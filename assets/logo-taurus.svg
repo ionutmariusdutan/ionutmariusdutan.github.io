@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 64" role="img" aria-labelledby="title">
+  <title id="title">Taurus Group</title>
+  <rect width="180" height="64" rx="14" fill="#fff"/>
+  <circle cx="42" cy="32" r="20" fill="#236d62"/>
+  <path d="M30 25c5-8 19-8 24 0M37 27v18M47 27v18M33 45h18" stroke="#f0c36d" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <text x="74" y="38" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="900" fill="#236d62">TAURUS</text>
+</svg>
