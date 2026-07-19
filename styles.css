@@ -676,15 +676,40 @@ a {
   overflow-wrap: break-word;
 }
 
-.timeline-body > ul:not(.role-stack) {
+.timeline-body > ul:not(.role-stack),
+.role-detail ul {
   margin: 18px 0 0;
   padding-left: 20px;
   color: var(--muted);
   overflow-wrap: break-word;
 }
 
-.timeline-body > ul:not(.role-stack) li + li {
+.timeline-body > ul:not(.role-stack) li + li,
+.role-detail ul li + li {
   margin-top: 8px;
+}
+
+.role-detail {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.role-detail h4 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
+  color: #2f3734;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.role-detail h4 span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 800;
 }
 
 .credentials-layout {
