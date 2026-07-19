@@ -184,7 +184,7 @@ a {
   position: absolute;
   inset: 0;
   display: block;
-  background-image: url("assets/support-operations-map.png");
+  background-image: url("assets/support-operations-map.jpg");
   background-position: center -110px;
   background-repeat: no-repeat;
   background-size: cover;
@@ -977,7 +977,7 @@ a {
   }
 
   .hero-media {
-    background-image: url("assets/support-operations-map-mobile.png");
+    background-image: url("assets/support-operations-map-mobile.jpg");
     background-position: center top;
   }
 
@@ -1032,7 +1032,23 @@ a {
   }
 
   .hero-signals {
-    display: none;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-top: 22px;
+  }
+
+  .hero-signals li {
+    min-height: 0;
+    padding: 10px 14px;
+  }
+
+  .hero-signals strong {
+    font-size: 1.35rem;
+  }
+
+  .hero-signals span {
+    margin-top: 2px;
+    font-size: 0.85rem;
   }
 
   .section-band {
@@ -1079,9 +1095,5 @@ a {
 @media (max-height: 700px) and (max-width: 760px) {
   .hero {
     min-height: 72svh;
-  }
-
-  .hero-signals {
-    display: none;
   }
 }
