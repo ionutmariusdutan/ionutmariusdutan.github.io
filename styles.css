@@ -439,6 +439,40 @@ a {
   overflow-wrap: break-word;
 }
 
+.before-after {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.before-after-value {
+  border-radius: 999px;
+  padding: 4px 11px;
+  font-size: 0.85rem;
+  font-weight: 900;
+}
+
+.before-after-before {
+  background: #f2e1e3;
+  color: var(--rose);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+
+.before-after-after {
+  background: #e6f0e9;
+  color: var(--green-dark);
+}
+
+.before-after-arrow {
+  color: var(--muted);
+  font-weight: 900;
+}
+
 .split-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
