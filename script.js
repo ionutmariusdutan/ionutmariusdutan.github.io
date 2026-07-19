@@ -83,6 +83,23 @@ if ("IntersectionObserver" in window && revealItems.length) {
   revealItems.forEach((item) => item.classList.add("is-visible"));
 }
 
+const timelineToggle = document.querySelector("[data-timeline-toggle]");
+const timelineEarlier = document.querySelector("[data-timeline-earlier]");
+const timelineToggleLabel = document.querySelector("[data-toggle-label]");
+
+timelineToggle?.addEventListener("click", () => {
+  const isHidden = timelineEarlier.hidden;
+  timelineEarlier.hidden = !isHidden;
+  timelineToggle.classList.toggle("is-open", isHidden);
+  timelineToggle.setAttribute("aria-expanded", String(isHidden));
+  if (timelineToggleLabel) {
+    timelineToggleLabel.textContent = isHidden ? "Hide earlier roles" : "Show 3 earlier roles (2009-2019)";
+  }
+  if (isHidden) {
+    timelineEarlier.querySelectorAll(".reveal").forEach((item) => item.classList.add("is-visible"));
+  }
+});
+
 copyButton?.addEventListener("click", async () => {
   const email = copyButton.dataset.copyEmail;
   if (!email) {
