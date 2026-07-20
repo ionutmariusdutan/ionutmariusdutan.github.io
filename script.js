@@ -93,7 +93,7 @@ timelineToggle?.addEventListener("click", () => {
   timelineToggle.classList.toggle("is-open", isHidden);
   timelineToggle.setAttribute("aria-expanded", String(isHidden));
   if (timelineToggleLabel) {
-    timelineToggleLabel.textContent = isHidden ? "Hide earlier roles" : "Show 3 earlier roles (2009-2019)";
+    timelineToggleLabel.textContent = isHidden ? "Hide earlier roles" : "Show 2 earlier roles (2010-2019)";
   }
   if (isHidden) {
     timelineEarlier.querySelectorAll(".reveal").forEach((item) => item.classList.add("is-visible"));
