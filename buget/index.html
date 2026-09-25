@@ -344,6 +344,8 @@
         .row-expense .f-who { grid-column: 3 / 4; grid-row: 2; }
         .row-expense > .icon-btn { grid-row: 1; grid-column: 3; }
         .row-expense > .season-btn { grid-row: 2; grid-column: 1; justify-self: center; }
+        .row-saving { grid-template-columns: minmax(0, 1fr) auto; }
+        .row-saving > .f-amt { grid-column: 1 / -1; grid-row: 2; }
       }
 
       .f-cur { display: contents; }
@@ -360,6 +362,10 @@
         color: var(--muted);
       }
       .loan .amt { width: 110px; flex: none; }
+      .row-saving { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto; }
+      .loan .pct { width: 108px; }
+      .loan .pct input { padding-right: 44px; }
+      .loan select, .loan input[type="month"] { width: auto; height: 36px; font-size: 0.82rem; }
       .loan .amt input { padding-right: 44px; }
 
       .dot { width: 12px; height: 12px; border-radius: 50%; }
@@ -456,7 +462,7 @@
       }
 
       .list-line .lbl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
-      .list-line .sub { display: block; font-size: 0.78rem; color: var(--muted); font-weight: 500; }
+      .list-line .sub { display: block; white-space: normal; font-size: 0.78rem; color: var(--muted); font-weight: 500; }
       .list-line .val { font-weight: 700; white-space: nowrap; }
       .list-line .pct { color: var(--muted); font-size: 0.8rem; width: 42px; text-align: right; }
 
@@ -631,6 +637,13 @@
           <div id="expenses"></div>
           <button class="btn btn-ghost" type="button" id="addExpense">+ Adaugă cheltuială</button>
         </section>
+
+        <section class="card">
+          <h2>Economii</h2>
+          <p class="hint">Conturi de economii și depozite. Nu intră la venituri; dobânda e estimată separat (dobândă simplă, fără capitalizare).</p>
+          <div id="savings"></div>
+          <button class="btn btn-ghost" type="button" id="addSaving">+ Adaugă cont de economii</button>
+        </section>
       </div>
 
       <div class="col results" id="results">
@@ -653,6 +666,14 @@
           <div class="eyebrow">Venit disponibil</div>
           <div class="big num" id="dispTotal">0 lei</div>
           <p class="note" id="dispNote"></p>
+        </section>
+
+        <section class="card" id="savingsCard" hidden>
+          <h2>Economii</h2>
+          <div class="big num" id="savingsTotal" style="font-size:clamp(1.8rem,6vw,2.3rem);margin:6px 0 10px">0 lei</div>
+          <div id="savingsList"></div>
+          <div class="total-line"><span>Dobândă netă estimată</span><b class="num" id="savingsInterest">0 lei</b></div>
+          <p class="hint" id="savingsNote" style="margin:8px 0 0"></p>
         </section>
 
         <section class="card" id="cmpCard" hidden>
@@ -694,7 +715,7 @@
     (function () {
       "use strict";
 
-      var STORE_KEY = "buget-familie-v17";
+      var STORE_KEY = "buget-familie-v18";
       var COLORS = ["var(--p1)", "var(--p2)", "var(--p3)", "var(--p4)"];
       var ICONS = [
         ["🏠", "Locuință"], ["💡", "Utilități"], ["🛒", "Mâncare"], ["🚗", "Transport"],
@@ -728,6 +749,9 @@
           rate: liveRate ? liveRate.eur : (p.rate || 5),
           rateAuto: true,
           fund: p.fund || 0,
+          savings: (p.savings || []).map(function (v) {
+            return { id: id(), label: v[0], amount: v[1], rate: v[2], payout: v[3] || "anual", tax: v[4] || 0, start: v[5] || "" };
+          }),
           baseline: null,
           split: "proportional",
           people: people,
@@ -745,6 +769,8 @@
               payer: typeof e[3] === "number" ? people[e[3]].id : "comun",
               left: e[4] || 0,
               leftAt: thisMonth(),
+              rest: e[6] || 0,
+              restAt: thisMonth(),
               seasonal: !!e[5],
               winter: { amount: e[5] ? e[5][0] : 0 },
               summer: { amount: e[5] ? e[5][1] : 0 }
@@ -758,14 +784,18 @@
           name: "Două ipoteci + chirii încasate",
           people: ["Marius", "Maria"],
           allIn: [0],
+          savings: [["Salt Bank Fidelis", 120000, 7.3, "anual", 0, "2026-10"],
+            ["Revolut Joint", 60000, 2.5, "zilnic", 10, ""],
+            ["CEC Bank", 64100, 5.25, "anual", 10, ""],
+            ["ING Bank economii", 40123, 2, "lunar", 10, ""]],
           incomes: [["Salariu Marius", 0, "luna", "RON", 0], ["Salariu Maria", 9500, "luna", "RON", 1],
             ["Bonuri de masă Marius", 0, "luna", "RON", 0],
             ["Bonuri de masă Maria", 765, "luna", "RON", 1],
             ["Chirie Eroii Revoluției", 2400, "luna", "RON", 0],
             ["Chirie Drumul Taberei", 1450, "luna", "RON", 0],
             ["Chirie Titan Maria", 1600, "luna", "RON", 1]],
-          expenses: [["🏠", "Rată ipotecar Maria", 1500, 1], ["🏠", "Rată ipotecar Marius", 1720, 0, 59],
-            ["💳", "Rată nevoi personale Marius", 1534, 0, 22],
+          expenses: [["🏠", "Rată ipotecar Maria", 1287, 1], ["🏠", "Rată ipotecar Marius", 1720, 0, 59],
+            ["💳", "Rată nevoi Marius", 1534, 0, 22], ["💳", "Rată nevoi Maria", 2000, 1, 0, null, 4900],
             ["📡", "Internet + TV", 120], ["🔥", "Gaz", 0, null, 0, [475, 0]], ["⚡", "Electrica", 250],
             ["☁️", "iCloud", 50], ["🤖", "Claude AI", 120],
             ["🛒", "Mâncare", 2000], ["🚗", "Transport", 859], ["📦", "Cheltuieli diverse", 2500],
@@ -943,13 +973,35 @@
 
       // „Rate rămase” se referă la luna în care au fost introduse (leftAt), inclusiv rata din acea lună,
       // și scad automat pe măsură ce trec lunile.
-      function remaining(e) {
-        var left = Math.round(num(e.left));
-        if (!left) return 0;
-        return Math.max(0, left - (monthIdx(state.month) - monthIdx(e.leftAt || state.month)));
+      // Alternativ, un credit poate fi definit prin „rest de plată” (lei) la luna restAt.
+      function hasTerm(e) { return num(e.left) > 0 || num(e.rest) > 0; }
+
+      function monthsSince(at) { return monthIdx(state.month) - monthIdx(at || state.month); }
+
+      function restLeft(e) {
+        return Math.max(0, num(e.rest) - num(e.amount) * Math.max(0, monthsSince(e.restAt)));
       }
 
-      function lastPaymentOf(e) { return monthName(monthIdx(e.leftAt || state.month) + Math.round(num(e.left)) - 1); }
+      function remaining(e) {
+        if (num(e.rest) > 0) return num(e.amount) > 0 ? Math.ceil(restLeft(e) / num(e.amount) - 1e-9) : 0;
+        var left = Math.round(num(e.left));
+        if (!left) return 0;
+        return Math.max(0, left - monthsSince(e.leftAt));
+      }
+
+      function lastPaymentOf(e) {
+        if (num(e.rest) > 0) {
+          var n = num(e.amount) > 0 ? Math.ceil(num(e.rest) / num(e.amount) - 1e-9) : 1;
+          return monthName(monthIdx(e.restAt || state.month) + n - 1);
+        }
+        return monthName(monthIdx(e.leftAt || state.month) + Math.round(num(e.left)) - 1);
+      }
+
+      // Cât mai e de plătit din luna selectată încolo (inclusiv luna curentă).
+      function totalLeft(e) {
+        if (num(e.rest) > 0) return restLeft(e);
+        return expAmount(e) * remaining(e);
+      }
 
       // Iarna = octombrie–martie, vara = aprilie–septembrie.
       function isWinter() {
@@ -959,21 +1011,38 @@
       }
 
       function expAmount(e) {
-        if (num(e.left) > 0 && remaining(e) === 0) return 0; // creditul s-a terminat
+        if (hasTerm(e) && remaining(e) === 0) return 0; // creditul s-a terminat
+        if (num(e.rest) > 0) return Math.min(num(e.amount), restLeft(e)); // ultima rată poate fi mai mică
         if (e.seasonal) return num((isWinter() ? e.winter : e.summer || {}).amount);
         return num(e.amount);
       }
 
       function isLoan(ex) {
-        return num(ex.left) > 0 || ex.icon === "💳" || /rat[aăe]\b|credit|ipotec|leasing|împrumut/i.test(ex.label || "");
+        return hasTerm(ex) || ex.icon === "💳" || /rat[aăe]\b|credit|ipotec|leasing|împrumut/i.test(ex.label || "");
       }
 
       function loanText(ex) {
         var n = remaining(ex);
-        if (!num(ex.left)) return "";
+        if (!hasTerm(ex)) return "";
         if (!n) return "achitat (ultima rată în " + lastPaymentOf(ex) + ")";
         return (n === 1 ? "1 rată rămasă" : n + " rate rămase") + " · ultima în " + lastPaymentOf(ex) +
-          " · rest " + lei(expAmount(ex) * n);
+          " · rest " + lei(totalLeft(ex));
+      }
+
+      // ---------- Economii ----------
+      var PAYOUT = { zilnic: "zilnic", lunar: "lunar", anual: "anual" };
+
+      function savingActive(v) { return !v.start || monthIdx(state.month) >= monthIdx(v.start); }
+
+      function savingYearNet(v) {
+        return num(v.amount) * num(v.rate) / 100 * (1 - num(v.tax) / 100);
+      }
+
+      function savingText(v) {
+        var y = savingYearNet(v);
+        if (v.payout === "zilnic") return "≈ " + (y / 365).toLocaleString("ro-RO", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " lei/zi";
+        if (v.payout === "lunar") return "≈ " + lei(y / 12) + "/lună";
+        return lei(y) + "/an";
       }
 
       // ---------- Editor ----------
@@ -1047,16 +1116,28 @@
           var loan = null;
           if (wasLoan) {
             var leftI = el("input", { type: "number", min: "0", step: "1", inputmode: "numeric", placeholder: "–", "aria-label": "Rate rămase pentru " + (ex.label || "cheltuială") });
-            leftI.value = num(ex.left) ? remaining(ex) : "";
+            var restI = el("input", { type: "number", min: "0", step: "1", inputmode: "decimal", placeholder: "–", "aria-label": "Rest de plată pentru " + (ex.label || "cheltuială") });
+            leftI.value = hasTerm(ex) ? remaining(ex) : "";
+            restI.value = num(ex.rest) > 0 ? Math.round(restLeft(ex)) : "";
             leftI.setAttribute("data-left", ex.id);
+            restI.setAttribute("data-rest", ex.id);
             leftI.addEventListener("input", function () {
               ex.left = leftI.value === "" ? 0 : Math.round(num(leftI.value));
               ex.leftAt = state.month || thisMonth();
+              ex.rest = 0; restI.value = "";
+              update();
+            });
+            restI.addEventListener("input", function () {
+              ex.rest = restI.value === "" ? 0 : num(restI.value);
+              ex.restAt = state.month || thisMonth();
+              ex.left = 0;
               update();
             });
             loan = el("div", { class: "loan" }, [
               el("span", { text: "Rate rămase" }),
               el("div", { class: "amt", "data-cur": "luni" }, [leftI]),
+              el("span", { text: "sau rest de plată" }),
+              el("div", { class: "amt", "data-cur": "lei" }, [restI]),
               el("span", { class: "num", "data-loan": ex.id })
             ]);
           }
@@ -1095,6 +1176,39 @@
             }),
             seasonRow,
             loan
+          ]));
+        });
+        renderSavings();
+      }
+
+      function renderSavings() {
+        var box = document.getElementById("savings");
+        box.innerHTML = "";
+        state.savings = state.savings || [];
+        if (!state.savings.length) box.appendChild(el("p", { class: "empty", text: "Niciun cont de economii." }));
+        state.savings.forEach(function (v) {
+          var rateI = el("input", { type: "number", min: "0", step: "0.01", inputmode: "decimal", placeholder: "0", "aria-label": "Dobândă anuală pentru " + (v.label || "cont") });
+          rateI.value = v.rate ? v.rate : "";
+          rateI.addEventListener("input", function () { v.rate = rateI.value === "" ? 0 : num(rateI.value); update(); });
+          var start = el("input", { type: "month", "aria-label": "Începe din" });
+          start.value = v.start || "";
+          start.addEventListener("input", function () { v.start = start.value; update(); });
+          box.appendChild(el("div", { class: "row row-saving" }, [
+            textInput(v, "label", "ex. Depozit", "Denumire cont"),
+            amountInput(v, "Sold pentru " + (v.label || "cont")),
+            delBtn("Șterge contul", function () {
+              state.savings = state.savings.filter(function (x) { return x !== v; });
+              renderSavings(); update();
+            }),
+            el("div", { class: "loan" }, [
+              el("span", { text: "Dobândă" }),
+              el("div", { class: "amt pct", "data-cur": "%/an" }, [rateI]),
+              el("span", { text: "plătită" }),
+              selectEl([["zilnic", "zilnic"], ["lunar", "lunar"], ["anual", "anual / la scadență"]], v.payout, function (x) { v.payout = x; update(); }, "small", "Cum se plătește dobânda"),
+              selectEl([["0", "fără impozit"], ["10", "impozit 10%"]], String(num(v.tax)), function (x) { v.tax = num(x); update(); }, "small", "Impozit pe dobândă"),
+              el("span", { text: "din" }),
+              start
+            ])
           ]));
         });
       }
@@ -1193,9 +1307,11 @@
           var c = document.querySelector('[data-season="' + e.id + '"]');
           if (c) c.textContent = (isWinter() ? "❄️ " : "☀️ ") + lei(expAmount(e));
           var n = document.querySelector('[data-loan="' + e.id + '"]');
-          if (n) n.textContent = num(e.left) > 0 ? (remaining(e) ? "ultima în " + lastPaymentOf(e) + " · rest " + lei(expAmount(e) * remaining(e)) : "achitat în " + lastPaymentOf(e)) : "";
+          if (n) n.textContent = hasTerm(e) ? (remaining(e) ? "ultima în " + lastPaymentOf(e) + " · rest " + lei(totalLeft(e)) : "achitat în " + lastPaymentOf(e)) : "";
           var li = document.querySelector('[data-left="' + e.id + '"]');
-          if (li && document.activeElement !== li && num(e.left)) li.value = remaining(e);
+          if (li && document.activeElement !== li && hasTerm(e)) li.value = remaining(e);
+          var ri = document.querySelector('[data-rest="' + e.id + '"]');
+          if (ri && document.activeElement !== ri && num(e.rest) > 0) ri.value = Math.round(restLeft(e));
         });
 
         // Editor: medii și total luni pentru venituri variabile
@@ -1222,7 +1338,7 @@
           var lbl = el("span", { class: "lbl", text: e.label || "Cheltuială" });
           var subs = [];
           if (e.payer !== "comun" && personIndex(e.payer) >= 0) subs.push("plătește " + nameOf(e.payer));
-          if (num(e.left) > 0) subs.push(loanText(e));
+          if (hasTerm(e)) subs.push(loanText(e));
           if (e.seasonal) subs.push((isWinter() ? "tarif de iarnă" : "tarif de vară") + " · iarna " + lei(num(e.winter.amount)) + ", vara " + lei(num(e.summer.amount)));
           if (subs.length) lbl.appendChild(el("span", { class: "sub", text: subs.join(" · ") }));
           list.appendChild(el("div", { class: "list-line" }, [
@@ -1252,7 +1368,8 @@
         et.classList.toggle("over", tight);
 
         // Disponibil
-        var fund = num(state.fund);
+        // Fără un fond de urgență completat separat, economiile țin loc de fond.
+        var fund = num(state.fund) || (state.savings || []).reduce(function (s, v) { return s + num(v.amount); }, 0);
         var dc = document.getElementById("dispCard");
         dc.classList.toggle("neg", tight);
         document.getElementById("dispTotal").textContent = (disp < 0 ? "−" : "") + lei(Math.abs(disp));
@@ -1367,6 +1484,36 @@
         }
         document.getElementById("splitNote").textContent = sn;
 
+        // Economii
+        var sv = state.savings || [];
+        var sc = document.getElementById("savingsCard");
+        sc.hidden = !sv.length;
+        var savingsTotal = sv.reduce(function (s, v) { return s + num(v.amount); }, 0);
+        var yearNet = sv.filter(savingActive).reduce(function (s, v) { return s + savingYearNet(v); }, 0);
+        if (sv.length) {
+          document.getElementById("savingsTotal").textContent = lei(savingsTotal);
+          var sl = document.getElementById("savingsList");
+          sl.innerHTML = "";
+          sv.forEach(function (v) {
+            var parts = [String(num(v.rate)).replace(".", ",") + "%/an", PAYOUT[v.payout] || "anual",
+              num(v.tax) ? "impozit " + num(v.tax) + "%" : "fără impozit"];
+            if (v.start) parts.push((savingActive(v) ? "din " : "începe în ") + monthName(monthIdx(v.start)));
+            var lbl = el("span", { class: "lbl", text: v.label || "Cont" });
+            lbl.appendChild(el("span", { class: "sub", text: lei(num(v.amount)) + " · " + parts.join(" · ") }));
+            sl.appendChild(el("div", { class: "list-line" }, [
+              el("span", { class: "ico", text: "🏦", "aria-hidden": "true" }),
+              lbl,
+              el("span", { class: "val num", style: savingActive(v) ? "" : "color:var(--muted)", text: savingText(v) })
+            ]));
+          });
+          document.getElementById("savingsInterest").textContent = lei(yearNet / 12) + "/lună";
+          var pending = sv.filter(function (v) { return !savingActive(v); });
+          var note = "Adică " + lei(yearNet) + " pe an, după impozit.";
+          if (pending.length) note += " Nu include " + pending.map(function (v) { return v.label + " (din " + monthName(monthIdx(v.start)) + ")"; }).join(", ") + ".";
+          if (expenseTotal > 0) note += " Economiile acoperă " + (savingsTotal / expenseTotal).toLocaleString("ro-RO", { maximumFractionDigits: 1 }) + " luni de cheltuieli.";
+          document.getElementById("savingsNote").textContent = note;
+        }
+
         // Observații
         var tips = [];
         if (incomeTotal > 0) {
@@ -1384,6 +1531,7 @@
             tips.push([hp > 35 ? "🏠" : "🏡", "Locuința (chirie/rate) înseamnă " + hp + "% din venit" + (hp > 35 ? " – peste pragul uzual de 35–40%." : ".")]);
           }
           var efund = expenseTotal * 6;
+          if (!fund && savingsTotal > 0) fund = savingsTotal;
           if (expenseTotal > 0) {
             var covered = fund / expenseTotal;
             var missing = Math.max(0, efund - fund);
@@ -1400,16 +1548,16 @@
             tips.push([isWinter() ? "❄️" : "☀️", "Acum e " + (isWinter() ? "iarnă" : "vară") + " (iarna = oct–mar). Cheltuieli lunare iarna: " +
               lei(wTotal) + ", vara: " + lei(sTotal) + " (diferență " + lei(Math.abs(delta)) + ")."]);
           }
-          var loans = state.expenses.filter(function (e) { return num(e.left) > 0 && expAmount(e) > 0; })
+          var loans = state.expenses.filter(function (e) { return hasTerm(e) && expAmount(e) > 0; })
             .sort(function (a, b) { return remaining(a) - remaining(b); });
           loans.forEach(function (e) {
             tips.push(["💳", (e.label || "Rata") + " se termină în " + lastPaymentOf(e) + " (" +
-              remaining(e) + " rate, " + lei(expAmount(e) * remaining(e)) + " de plătit). Apoi aveți +" +
-              lei(expAmount(e)) + " pe lună."]);
+              remaining(e) + (remaining(e) === 1 ? " rată, " : " rate, ") + lei(totalLeft(e)) + " de plătit). Apoi aveți +" +
+              lei(num(e.amount)) + " pe lună."]);
           });
           if (loans.length > 1) {
             tips.push(["📉", "Total de plătit pe ratele cu durată cunoscută: " +
-              lei(loans.reduce(function (s, e) { return s + expAmount(e) * remaining(e); }, 0)) + "."]);
+              lei(loans.reduce(function (s, e) { return s + totalLeft(e); }, 0)) + "."]);
           }
           var irregular = state.incomes.filter(function (x) { return x.freq !== "luna" && monthlyLei(x) > 0; });
           if (irregular.length) {
@@ -1512,6 +1660,14 @@
         state.incomes.push({ id: id(), label: "", amount: 0, freq: "luna", cur: "RON", owner: "comun" });
         renderEditor(); update();
         var inputs = document.querySelectorAll("#incomes .f-name input");
+        inputs[inputs.length - 1].focus();
+      });
+
+      document.getElementById("addSaving").addEventListener("click", function () {
+        state.savings = state.savings || [];
+        state.savings.push({ id: id(), label: "", amount: 0, rate: 0, payout: "anual", tax: 10, start: "" });
+        renderSavings(); update();
+        var inputs = document.querySelectorAll("#savings input[type=text]");
         inputs[inputs.length - 1].focus();
       });
 
