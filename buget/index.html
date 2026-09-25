@@ -459,7 +459,14 @@
         display: grid;
         place-items: center;
         flex: none;
+        overflow: hidden;
       }
+      .ico img, .img-icon img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .img-icon {
+        width: 54px; height: 40px; padding: 0 7px; border: 1px solid var(--line); border-radius: 10px;
+        background: var(--surface); cursor: pointer; display: grid; place-items: center;
+      }
+      .img-icon img { width: 30px; height: 30px; border-radius: 8px; }
 
       .list-line .lbl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
       .list-line .sub { display: block; white-space: normal; font-size: 0.78rem; color: var(--muted); font-weight: 500; }
@@ -715,7 +722,7 @@
     (function () {
       "use strict";
 
-      var STORE_KEY = "buget-familie-v19";
+      var STORE_KEY = "buget-familie-v20";
       var COLORS = ["var(--p1)", "var(--p2)", "var(--p3)", "var(--p4)"];
       var ICONS = [
         ["🏠", "Locuință"], ["💡", "Utilități"], ["🛒", "Mâncare"], ["🚗", "Transport"],
@@ -766,7 +773,7 @@
           }),
           expenses: p.expenses.map(function (e) {
             return {
-              id: id(), icon: e[0], label: e[1], amount: e[2],
+              id: id(), icon: e[0], label: e[1], amount: e[2], img: (p.images || {})[e[1]] || "",
               payer: typeof e[3] === "number" ? people[e[3]].id : "comun",
               left: e[4] || 0,
               leftAt: thisMonth(),
@@ -785,6 +792,12 @@
           name: "Două ipoteci + chirii încasate",
           people: ["Marius", "Maria"],
           allIn: [0],
+          images: {
+            "Rată ipotecar Marius": "icons/exim.png", "Rată nevoi Marius": "icons/salt.png",
+            "Rată ipotecar Maria": "icons/ing.png", "Rată nevoi Maria": "icons/ing.png",
+            "Transport": "icons/rompetrol.png", "iCloud": "icons/icloud.png", "Internet + TV": "icons/digi.png",
+            "Electrica": "icons/ihidro.png", "Claude AI": "icons/claude.svg", "Revista DeAgostini": "icons/deagostini.png"
+          },
           savings: [["Salt Bank Fidelis", 120000, 7.3, "anual", 0, "2026-10", 24],
             ["Revolut Joint", 60000, 2.5, "zilnic", 10, ""],
             ["CEC Bank", 64100, 5.25, "anual", 10, ""],
@@ -1116,7 +1129,13 @@
         if (!state.expenses.length) ee.appendChild(el("p", { class: "empty", text: "Nicio cheltuială adăugată." }));
         var iconOpts = ICONS.map(function (x) { return [x[0], x[0] + " " + x[1]]; });
         state.expenses.forEach(function (ex) {
-          var icon = selectEl(iconOpts, ex.icon, function (v) { ex.icon = v; renderEditor(); update(); }, "emoji", "Pictogramă");
+          var icon = ex.img
+            ? el("button", {
+                type: "button", class: "img-icon", title: "Pictogramă personalizată – apasă ca să alegi un emoji",
+                "aria-label": "Înlocuiește pictograma cu un emoji",
+                onclick: function () { ex.img = ""; renderEditor(); update(); }
+              }, [el("img", { src: ex.img, alt: "" })])
+            : selectEl(iconOpts, ex.icon, function (v) { ex.icon = v; renderEditor(); update(); }, "emoji", "Pictogramă");
           var name = textInput(ex, "label", "ex. Mâncare", "Denumire cheltuială");
           var wasLoan = isLoan(ex);
           name.addEventListener("change", function () { if (isLoan(ex) !== wasLoan) renderEditor(); });
@@ -1359,7 +1378,9 @@
           if (e.seasonal) subs.push((isWinter() ? "tarif de iarnă" : "tarif de vară") + " · iarna " + lei(num(e.winter.amount)) + ", vara " + lei(num(e.summer.amount)));
           if (subs.length) lbl.appendChild(el("span", { class: "sub", text: subs.join(" · ") }));
           list.appendChild(el("div", { class: "list-line" }, [
-            el("span", { class: "ico", text: e.icon || "📦", "aria-hidden": "true" }),
+            e.img
+              ? el("span", { class: "ico", "aria-hidden": "true" }, [el("img", { src: e.img, alt: "" })])
+              : el("span", { class: "ico", text: e.icon || "📦", "aria-hidden": "true" }),
             lbl,
             el("span", { class: "pct num", text: pct + "%" }),
             el("span", { class: "val num", text: lei(expAmount(e)) })
