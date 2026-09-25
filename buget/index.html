@@ -91,6 +91,7 @@
       }
 
       * { box-sizing: border-box; }
+      [hidden] { display: none !important; }
 
       body {
         margin: 0;
@@ -298,6 +299,8 @@
       .seg-row .amt { min-width: 0; }
       .segs-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--muted); }
       .segs-foot .warn { color: var(--warn); }
+      .rate-info { font-weight: 500; font-size: 0.75rem; line-height: 1.35; }
+      .rate-info .link-btn { font-size: 0.75rem; padding: 2px 0 0; display: block; }
       .link-btn { background: none; border: 0; padding: 4px 0; color: var(--accent-ink); font-weight: 700; cursor: pointer; font-size: 0.85rem; }
       .avg { display: flex; align-items: center; justify-content: flex-end; height: 40px; padding: 0 10px; font-size: 0.85rem; color: var(--muted); border: 1px dashed var(--line); border-radius: 10px; white-space: nowrap; overflow: hidden; }
 
@@ -572,7 +575,9 @@
               <input type="month" id="month">
             </label>
             <label>Curs EUR → lei
-              <input type="number" id="rate" min="0" step="0.01" inputmode="decimal">
+              <input type="number" id="rate" min="0" step="0.0001" inputmode="decimal">
+              <span class="rate-info"><span id="rateInfo">Se încarcă cursul BNR…</span>
+                <button type="button" class="link-btn" id="rateReset" hidden>Folosește cursul BNR</button></span>
             </label>
             <label>Fond de urgență strâns (lei)
               <input type="number" id="fund" min="0" step="1" inputmode="decimal" placeholder="0">
@@ -696,7 +701,8 @@
         var people = p.people.map(function (name) { return { id: id(), name: name }; });
         return {
           month: thisMonth(),
-          rate: p.rate || 5,
+          rate: liveRate ? liveRate.eur : (p.rate || 5),
+          rateAuto: true,
           fund: p.fund || 0,
           baseline: null,
           split: "proportional",
@@ -778,6 +784,7 @@
 
       // ---------- Stare ----------
       var state;
+      var liveRate = null;
       var lastTotals = { income: 0, expenses: 0, disp: 0, fund: 0 };
 
       function load() {
@@ -1236,13 +1243,59 @@
         presetsBox.appendChild(el("button", {
           type: "button", class: "btn", text: p.name, onclick: function () {
             var bl = state.baseline;
-            state = build(p); state.baseline = bl; renderEditor(); update();
+            state = build(p); state.baseline = bl; renderEditor(); update(); showRateInfo();
           }
         }));
       });
 
       document.getElementById("month").addEventListener("input", function (e) { state.month = e.target.value; update(); });
-      document.getElementById("rate").addEventListener("input", function (e) { state.rate = num(e.target.value); update(); });
+      document.getElementById("rate").addEventListener("input", function (e) {
+        state.rate = num(e.target.value); state.rateAuto = false; showRateInfo(); update();
+      });
+      document.getElementById("rateReset").addEventListener("click", function () {
+        if (!liveRate) return;
+        state.rate = liveRate.eur; state.rateAuto = true;
+        document.getElementById("rate").value = state.rate;
+        showRateInfo(); update();
+      });
+
+      function fmtDate(iso) {
+        var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || "");
+        return m ? m[3] + "." + m[2] + "." + m[1] : "";
+      }
+
+      function showRateInfo() {
+        var info = document.getElementById("rateInfo");
+        var reset = document.getElementById("rateReset");
+        if (!liveRate) {
+          info.textContent = "Cursul BNR nu a putut fi încărcat – introdu-l manual.";
+          reset.hidden = true;
+          return;
+        }
+        var live = "BNR " + liveRate.eur.toLocaleString("ro-RO", { minimumFractionDigits: 4 }) +
+          " lei din " + fmtDate(liveRate.date) + " (" + (liveRate.source || "cursbnr.ro") + ")";
+        var manual = state.rateAuto === false && Math.abs(num(state.rate) - liveRate.eur) > 0.00005;
+        info.textContent = manual ? "Curs manual. " + live + "." : "Curs " + live + ".";
+        reset.hidden = !manual;
+      }
+
+      function loadLiveRate() {
+        if (!window.fetch) { showRateInfo(); return; }
+        fetch("curs.json", { cache: "no-cache" })
+          .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+          .then(function (d) {
+            if (!d || !(d.eur > 3 && d.eur < 10)) throw new Error("curs invalid");
+            liveRate = { eur: +d.eur, date: d.date, source: d.source };
+            if (state.rateAuto !== false) {
+              state.rate = liveRate.eur;
+              state.rateAuto = true;
+              document.getElementById("rate").value = state.rate;
+              update();
+            }
+            showRateInfo();
+          })
+          .catch(function () { liveRate = null; showRateInfo(); });
+      }
       document.getElementById("fund").addEventListener("input", function (e) { state.fund = num(e.target.value); update(); });
 
       document.getElementById("snapBtn").addEventListener("click", function () {
@@ -1282,6 +1335,7 @@
       document.getElementById("resetBtn").addEventListener("click", function () {
         if (!confirm("Ștergi toate datele introduse?")) return;
         state = build({ people: ["El", "Ea"], incomes: [["Salariu El", 0, "luna", "RON", 0], ["Salariu Ea", 0, "luna", "RON", 1]], expenses: [] });
+        showRateInfo();
         renderEditor(); update();
       });
 
@@ -1298,6 +1352,7 @@
       state = load();
       renderEditor();
       update();
+      loadLiveRate();
     })();
     </script>
   </body>
