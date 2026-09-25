@@ -1419,7 +1419,8 @@
         // Lista cheltuieli
         var list = document.getElementById("expenseList");
         list.innerHTML = "";
-        var sorted = state.expenses.filter(function (e) { return expAmount(e) > 0; })
+        // Cheltuielile cu plan pe luni sau iarnă/vară apar și în lunile în care sunt 0, ca să nu „dispară”.
+        var sorted = state.expenses.filter(function (e) { return expAmount(e) > 0 || e.planOn || (e.seasonal && !hasTerm(e)); })
           .sort(function (a, b) { return expAmount(b) - expAmount(a); });
         if (!sorted.length) list.appendChild(el("p", { class: "empty", text: "Adaugă cheltuieli în stânga." }));
         sorted.forEach(function (e) {
@@ -1437,7 +1438,7 @@
               : el("span", { class: "ico", text: e.icon || "📦", "aria-hidden": "true" }),
             lbl,
             el("span", { class: "pct num", text: pct + "%" }),
-            el("span", { class: "val num", text: lei(expAmount(e)) })
+            el("span", { class: "val num", style: expAmount(e) > 0 ? "" : "color:var(--muted)", text: lei(expAmount(e)) })
           ]));
         });
 
@@ -1446,7 +1447,7 @@
         stack.innerHTML = "";
         var base = Math.max(incomeTotal, expenseTotal) || 1;
         var palette = ["var(--p2)", "var(--p1)", "var(--p3)", "var(--p4)"];
-        sorted.forEach(function (e, i) {
+        sorted.filter(function (e) { return expAmount(e) > 0; }).forEach(function (e, i) {
           stack.appendChild(el("i", {
             style: "width:" + (expAmount(e) / base * 100) + "%;background:" + palette[i % palette.length] + ";opacity:" + (1 - Math.floor(i / 4) * 0.25)
           }));
