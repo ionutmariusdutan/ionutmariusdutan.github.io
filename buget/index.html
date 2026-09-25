@@ -344,6 +344,20 @@
 
       .f-cur { display: contents; }
 
+      .loan {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        border-top: 1px dashed var(--line);
+        padding-top: 8px;
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+      .loan .amt { width: 110px; flex: none; }
+      .loan .amt input { padding-right: 44px; }
+
       .dot { width: 12px; height: 12px; border-radius: 50%; }
 
       input[type="text"], input[type="number"], input[type="month"], select {
@@ -674,7 +688,7 @@
     (function () {
       "use strict";
 
-      var STORE_KEY = "buget-familie-v6";
+      var STORE_KEY = "buget-familie-v7";
       var COLORS = ["var(--p1)", "var(--p2)", "var(--p3)", "var(--p4)"];
       var ICONS = [
         ["🏠", "Locuință"], ["💡", "Utilități"], ["🛒", "Mâncare"], ["🚗", "Transport"],
@@ -719,7 +733,8 @@
           expenses: p.expenses.map(function (e) {
             return {
               id: id(), icon: e[0], label: e[1], amount: e[2],
-              payer: typeof e[3] === "number" ? people[e[3]].id : "comun"
+              payer: typeof e[3] === "number" ? people[e[3]].id : "comun",
+              left: e[4] || 0
             };
           })
         };
@@ -734,7 +749,8 @@
             ["Bonuri de masă Maria", 765, "luna", "RON", 1],
             ["Chirie Eroii Revoluției", 2400, "luna", "RON", 0],
             ["Chirie Drumul Taberei", 1450, "luna", "RON", 0]],
-          expenses: [["🏠", "Rată ipotecar Maria", 3300], ["🏠", "Rată ipotecar Marius", 1700], ["💡", "Utilități", 900],
+          expenses: [["🏠", "Rată ipotecar Maria", 1500], ["🏠", "Rată ipotecar Marius", 1720, null, 59],
+            ["💳", "Rată nevoi personale Marius", 1534, 0, 22], ["💡", "Utilități", 900],
             ["🛒", "Mâncare", 4000], ["🚗", "Transport", 859], ["📱", "Abonamente", 230], ["✨", "Dorințe", 2000]]
         },
         {
@@ -894,6 +910,26 @@
         return o;
       }
 
+      var MONTHS_SHORT = ["ian.", "feb.", "mar.", "apr.", "mai", "iun.", "iul.", "aug.", "sept.", "oct.", "nov.", "dec."];
+
+      // Luna ultimei rate, dacă rata din luna curentă este inclusă în cele rămase.
+      function lastPayment(left) {
+        var m = /^(\d{4})-(\d{2})$/.exec(state.month || "") || /^(\d{4})-(\d{2})$/.exec(thisMonth());
+        var idx = (+m[1]) * 12 + (+m[2] - 1) + Math.round(left) - 1;
+        return MONTHS_SHORT[idx % 12] + " " + Math.floor(idx / 12);
+      }
+
+      function isLoan(ex) {
+        return num(ex.left) > 0 || ex.icon === "💳" || /rat[aăe]\b|credit|ipotec|leasing|împrumut/i.test(ex.label || "");
+      }
+
+      function loanText(ex) {
+        var n = Math.round(num(ex.left));
+        if (!n) return "";
+        return (n === 1 ? "1 rată rămasă" : n + " rate rămase") + " · ultima în " + lastPayment(n) +
+          " · rest " + lei(num(ex.amount) * n);
+      }
+
       // ---------- Editor ----------
       function renderEditor() {
         document.getElementById("month").value = state.month || thisMonth();
@@ -958,10 +994,24 @@
         if (!state.expenses.length) ee.appendChild(el("p", { class: "empty", text: "Nicio cheltuială adăugată." }));
         var iconOpts = ICONS.map(function (x) { return [x[0], x[0] + " " + x[1]]; });
         state.expenses.forEach(function (ex) {
-          var icon = selectEl(iconOpts, ex.icon, function (v) { ex.icon = v; update(); }, "emoji", "Pictogramă");
+          var icon = selectEl(iconOpts, ex.icon, function (v) { ex.icon = v; renderEditor(); update(); }, "emoji", "Pictogramă");
+          var name = textInput(ex, "label", "ex. Mâncare", "Denumire cheltuială");
+          var wasLoan = isLoan(ex);
+          name.addEventListener("change", function () { if (isLoan(ex) !== wasLoan) renderEditor(); });
+          var loan = null;
+          if (wasLoan) {
+            var leftI = el("input", { type: "number", min: "0", step: "1", inputmode: "numeric", placeholder: "–", "aria-label": "Rate rămase pentru " + (ex.label || "cheltuială") });
+            leftI.value = ex.left ? ex.left : "";
+            leftI.addEventListener("input", function () { ex.left = leftI.value === "" ? 0 : Math.round(num(leftI.value)); update(); });
+            loan = el("div", { class: "loan" }, [
+              el("span", { text: "Rate rămase" }),
+              el("div", { class: "amt", "data-cur": "luni" }, [leftI]),
+              el("span", { class: "num", "data-loan": ex.id })
+            ]);
+          }
           ee.appendChild(el("div", { class: "row row-expense" }, [
             icon,
-            textInput(ex, "label", "ex. Mâncare", "Denumire cheltuială"),
+            name,
             amountInput(ex, "Sumă pentru " + (ex.label || "cheltuială")),
             el("div", { class: "f-who" }, [
               selectEl(ownerOptions(true), ex.payer, function (v) { ex.payer = v; update(); }, "small", "Cine plătește")
@@ -969,7 +1019,8 @@
             delBtn("Șterge cheltuiala", function () {
               state.expenses = state.expenses.filter(function (x) { return x !== ex; });
               renderEditor(); update();
-            })
+            }),
+            loan
           ]));
         });
       }
@@ -1064,6 +1115,11 @@
           }
         });
 
+        state.expenses.forEach(function (e) {
+          var n = document.querySelector('[data-loan="' + e.id + '"]');
+          if (n) n.textContent = num(e.left) > 0 ? "ultima în " + lastPayment(num(e.left)) + " · rest " + lei(num(e.amount) * num(e.left)) : "";
+        });
+
         // Editor: medii și total luni pentru venituri variabile
         state.incomes.forEach(function (inc) {
           if (inc.freq !== "variabil") return;
@@ -1086,9 +1142,10 @@
         sorted.forEach(function (e) {
           var pct = incomeTotal > 0 ? Math.round(num(e.amount) / incomeTotal * 100) : 0;
           var lbl = el("span", { class: "lbl", text: e.label || "Cheltuială" });
-          if (e.payer !== "comun" && personIndex(e.payer) >= 0) {
-            lbl.appendChild(el("span", { class: "sub", text: "plătește " + nameOf(e.payer) }));
-          }
+          var subs = [];
+          if (e.payer !== "comun" && personIndex(e.payer) >= 0) subs.push("plătește " + nameOf(e.payer));
+          if (num(e.left) > 0) subs.push(loanText(e));
+          if (subs.length) lbl.appendChild(el("span", { class: "sub", text: subs.join(" · ") }));
           list.appendChild(el("div", { class: "list-line" }, [
             el("span", { class: "ico", text: e.icon || "📦", "aria-hidden": "true" }),
             lbl,
@@ -1205,7 +1262,7 @@
           else tips.push(["👍", "Rămâi cu " + Math.round(rate) + "% din venit. Încearcă să ajungi la 20%."]);
 
           var housing = state.expenses.filter(function (e) {
-            return e.icon === "🏠" || /chiri|rat[aă]|ipotec|credit/i.test(e.label || "");
+            return e.icon === "🏠" || /chiri|ipotec/i.test(e.label || "");
           }).reduce(function (s, e) { return s + num(e.amount); }, 0);
           if (housing > 0) {
             var hp = Math.round(housing / incomeTotal * 100);
@@ -1220,6 +1277,17 @@
             if (missing <= 0) tips.push(["🛟", t + " – atinsă!"]);
             else if (disp > 0) tips.push(["🛟", t + ": îți mai lipsesc " + lei(missing) + ", adică ~" + Math.ceil(missing / disp) + " luni de economisit la ritmul actual."]);
             else tips.push(["🛟", t + ". Fără venit disponibil nu poți pune nimic deoparte – taie întâi din cheltuieli."]);
+          }
+          var loans = state.expenses.filter(function (e) { return num(e.left) > 0 && num(e.amount) > 0; })
+            .sort(function (a, b) { return num(a.left) - num(b.left); });
+          loans.forEach(function (e) {
+            tips.push(["💳", (e.label || "Rata") + " se termină în " + lastPayment(num(e.left)) + " (" +
+              Math.round(num(e.left)) + " rate, " + lei(num(e.amount) * num(e.left)) + " de plătit). Apoi aveți +" +
+              lei(num(e.amount)) + " pe lună."]);
+          });
+          if (loans.length > 1) {
+            tips.push(["📉", "Total de plătit pe ratele cu durată cunoscută: " +
+              lei(loans.reduce(function (s, e) { return s + num(e.amount) * num(e.left); }, 0)) + "."]);
           }
           var irregular = state.incomes.filter(function (x) { return x.freq !== "luna" && monthlyLei(x) > 0; });
           if (irregular.length) {
