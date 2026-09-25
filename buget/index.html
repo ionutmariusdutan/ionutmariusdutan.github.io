@@ -328,7 +328,10 @@
 
       .row-person { grid-template-columns: 14px minmax(0, 1fr) minmax(0, 1fr) auto; }
       .row-income { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto auto minmax(0, 0.8fr) auto; }
-      .row-expense { grid-template-columns: auto minmax(0, 1.4fr) minmax(0, 1fr) auto auto; }
+      .row-expense { grid-template-columns: auto minmax(0, 1.4fr) minmax(0, 1fr) auto auto auto; }
+      .season-btn { font-size: 1rem; filter: grayscale(1); opacity: 0.55; }
+      .season-btn[aria-pressed="true"] { filter: none; opacity: 1; border-color: var(--line); }
+      .season-btn:hover { color: inherit; opacity: 1; }
 
       @media (max-width: 560px) {
         .row-income { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto; }
@@ -340,6 +343,7 @@
         .row-expense > .f-amt { grid-column: 2 / 3; }
         .row-expense .f-who { grid-column: 3 / 4; grid-row: 2; }
         .row-expense > .icon-btn { grid-row: 1; grid-column: 3; }
+        .row-expense > .season-btn { grid-row: 2; grid-column: 1; justify-self: center; }
       }
 
       .f-cur { display: contents; }
@@ -688,14 +692,15 @@
     (function () {
       "use strict";
 
-      var STORE_KEY = "buget-familie-v9";
+      var STORE_KEY = "buget-familie-v10";
       var COLORS = ["var(--p1)", "var(--p2)", "var(--p3)", "var(--p4)"];
       var ICONS = [
         ["🏠", "Locuință"], ["💡", "Utilități"], ["🛒", "Mâncare"], ["🚗", "Transport"],
         ["⛽", "Benzină"], ["📱", "Abonamente"], ["✨", "Dorințe"], ["🎒", "Școală"],
         ["📚", "After-school"], ["👶", "Copii"], ["💊", "Sănătate"], ["🏋️", "Sală"],
         ["🛡️", "Asigurări"], ["💳", "Credit"], ["🐾", "Animale"], ["👤", "Personale"], ["🎁", "Cadouri"],
-        ["✈️", "Vacanțe"], ["🚬", "Țigări"], ["💰", "Economii"], ["📦", "Altele"]
+        ["✈️", "Vacanțe"], ["🚬", "Țigări"], ["💰", "Economii"], ["📡", "Internet & TV"], ["🔥", "Gaz"],
+        ["⚡", "Electricitate"], ["☁️", "Cloud"], ["🤖", "AI"], ["📦", "Altele"]
       ];
       var MONTHS = ["ianuarie", "februarie", "martie", "aprilie", "mai", "iunie", "iulie",
         "august", "septembrie", "octombrie", "noiembrie", "decembrie"];
@@ -734,7 +739,11 @@
             return {
               id: id(), icon: e[0], label: e[1], amount: e[2],
               payer: typeof e[3] === "number" ? people[e[3]].id : "comun",
-              left: e[4] || 0
+              left: e[4] || 0,
+              leftAt: thisMonth(),
+              seasonal: !!e[5],
+              winter: { amount: e[5] ? e[5][0] : 0 },
+              summer: { amount: e[5] ? e[5][1] : 0 }
             };
           })
         };
@@ -752,6 +761,8 @@
             ["Chirie Titan Maria", 1600, "luna", "RON", 1]],
           expenses: [["🏠", "Rată ipotecar Maria", 1500], ["🏠", "Rată ipotecar Marius", 1720, null, 59],
             ["💳", "Rată nevoi personale Marius", 1534, 0, 22], ["💡", "Utilități", 900],
+            ["📡", "Internet + TV", 120], ["🔥", "Gaz", 0, null, 0, [475, 0]], ["⚡", "Electrica", 250],
+            ["☁️", "iCloud", 50], ["🤖", "Claude AI", 120],
             ["🛒", "Mâncare", 4000], ["🚗", "Transport", 859], ["📱", "Abonamente", 230], ["✨", "Dorințe", 2000]]
         },
         {
@@ -813,7 +824,11 @@
           var raw = localStorage.getItem(STORE_KEY);
           if (raw) {
             var s = JSON.parse(raw);
-            if (s && Array.isArray(s.people) && Array.isArray(s.incomes) && Array.isArray(s.expenses)) return s;
+            if (s && Array.isArray(s.people) && Array.isArray(s.incomes) && Array.isArray(s.expenses)) {
+              // Luna salvată rămasă în urmă trece automat pe luna curentă.
+              if (!s.month || s.month < thisMonth()) s.month = thisMonth();
+              return s;
+            }
           }
         } catch (e) {}
         return build(PRESETS[0]);
@@ -913,11 +928,34 @@
 
       var MONTHS_SHORT = ["ian.", "feb.", "mar.", "apr.", "mai", "iun.", "iul.", "aug.", "sept.", "oct.", "nov.", "dec."];
 
-      // Luna ultimei rate, dacă rata din luna curentă este inclusă în cele rămase.
-      function lastPayment(left) {
+      function monthIdx(ym) {
+        var m = /^(\d{4})-(\d{2})$/.exec(ym || "") || /^(\d{4})-(\d{2})$/.exec(thisMonth());
+        return (+m[1]) * 12 + (+m[2] - 1);
+      }
+
+      function monthName(idx) { return MONTHS_SHORT[idx % 12] + " " + Math.floor(idx / 12); }
+
+      // „Rate rămase” se referă la luna în care au fost introduse (leftAt), inclusiv rata din acea lună,
+      // și scad automat pe măsură ce trec lunile.
+      function remaining(e) {
+        var left = Math.round(num(e.left));
+        if (!left) return 0;
+        return Math.max(0, left - (monthIdx(state.month) - monthIdx(e.leftAt || state.month)));
+      }
+
+      function lastPaymentOf(e) { return monthName(monthIdx(e.leftAt || state.month) + Math.round(num(e.left)) - 1); }
+
+      // Iarna = octombrie–martie, vara = aprilie–septembrie.
+      function isWinter() {
         var m = /^(\d{4})-(\d{2})$/.exec(state.month || "") || /^(\d{4})-(\d{2})$/.exec(thisMonth());
-        var idx = (+m[1]) * 12 + (+m[2] - 1) + Math.round(left) - 1;
-        return MONTHS_SHORT[idx % 12] + " " + Math.floor(idx / 12);
+        var mo = +m[2];
+        return mo >= 10 || mo <= 3;
+      }
+
+      function expAmount(e) {
+        if (num(e.left) > 0 && remaining(e) === 0) return 0; // creditul s-a terminat
+        if (e.seasonal) return num((isWinter() ? e.winter : e.summer || {}).amount);
+        return num(e.amount);
       }
 
       function isLoan(ex) {
@@ -925,10 +963,11 @@
       }
 
       function loanText(ex) {
-        var n = Math.round(num(ex.left));
-        if (!n) return "";
-        return (n === 1 ? "1 rată rămasă" : n + " rate rămase") + " · ultima în " + lastPayment(n) +
-          " · rest " + lei(num(ex.amount) * n);
+        var n = remaining(ex);
+        if (!num(ex.left)) return "";
+        if (!n) return "achitat (ultima rată în " + lastPaymentOf(ex) + ")";
+        return (n === 1 ? "1 rată rămasă" : n + " rate rămase") + " · ultima în " + lastPaymentOf(ex) +
+          " · rest " + lei(expAmount(ex) * n);
       }
 
       // ---------- Editor ----------
@@ -1002,25 +1041,53 @@
           var loan = null;
           if (wasLoan) {
             var leftI = el("input", { type: "number", min: "0", step: "1", inputmode: "numeric", placeholder: "–", "aria-label": "Rate rămase pentru " + (ex.label || "cheltuială") });
-            leftI.value = ex.left ? ex.left : "";
-            leftI.addEventListener("input", function () { ex.left = leftI.value === "" ? 0 : Math.round(num(leftI.value)); update(); });
+            leftI.value = num(ex.left) ? remaining(ex) : "";
+            leftI.setAttribute("data-left", ex.id);
+            leftI.addEventListener("input", function () {
+              ex.left = leftI.value === "" ? 0 : Math.round(num(leftI.value));
+              ex.leftAt = state.month || thisMonth();
+              update();
+            });
             loan = el("div", { class: "loan" }, [
               el("span", { text: "Rate rămase" }),
               el("div", { class: "amt", "data-cur": "luni" }, [leftI]),
               el("span", { class: "num", "data-loan": ex.id })
             ]);
           }
+          if (!ex.winter) ex.winter = { amount: 0 };
+          if (!ex.summer) ex.summer = { amount: 0 };
+          var seasonBtn = el("button", {
+            type: "button", class: "icon-btn season-btn", text: "❄️", "aria-pressed": String(!!ex.seasonal),
+            title: ex.seasonal ? "Sumă unică tot anul" : "Sumă diferită iarna / vara",
+            "aria-label": "Sumă diferită iarna și vara pentru " + (ex.label || "cheltuială"),
+            onclick: function () {
+              if (ex.seasonal) { ex.amount = expAmount(ex); ex.seasonal = false; }
+              else { ex.winter.amount = num(ex.amount); ex.summer.amount = num(ex.amount); ex.seasonal = true; }
+              renderEditor(); update();
+            }
+          });
+          var amountCell = ex.seasonal
+            ? el("div", { class: "avg f-amt num", "data-season": ex.id, title: "suma din luna selectată" })
+            : amountInput(ex, "Sumă pentru " + (ex.label || "cheltuială"));
+          var seasonRow = ex.seasonal ? el("div", { class: "loan" }, [
+            el("span", { text: "❄️ Iarna (oct–mar)" }),
+            amountInput(ex.winter, "Sumă iarna pentru " + (ex.label || "cheltuială")),
+            el("span", { text: "☀️ Vara (apr–sep)" }),
+            amountInput(ex.summer, "Sumă vara pentru " + (ex.label || "cheltuială"))
+          ]) : null;
           ee.appendChild(el("div", { class: "row row-expense" }, [
             icon,
             name,
-            amountInput(ex, "Sumă pentru " + (ex.label || "cheltuială")),
+            amountCell,
             el("div", { class: "f-who" }, [
               selectEl(ownerOptions(true), ex.payer, function (v) { ex.payer = v; update(); }, "small", "Cine plătește")
             ]),
+            seasonBtn,
             delBtn("Șterge cheltuiala", function () {
               state.expenses = state.expenses.filter(function (x) { return x !== ex; });
               renderEditor(); update();
             }),
+            seasonRow,
             loan
           ]));
         });
@@ -1071,7 +1138,7 @@
         var perPersonExp = {};
         state.people.forEach(function (p) { perPersonExp[p.id] = 0; });
         state.expenses.forEach(function (e) {
-          var a = num(e.amount);
+          var a = expAmount(e);
           expenseTotal += a;
           if (perPersonExp[e.payer] !== undefined) perPersonExp[e.payer] += a;
           else commonExp += a;
@@ -1117,8 +1184,12 @@
         });
 
         state.expenses.forEach(function (e) {
+          var c = document.querySelector('[data-season="' + e.id + '"]');
+          if (c) c.textContent = (isWinter() ? "❄️ " : "☀️ ") + lei(expAmount(e));
           var n = document.querySelector('[data-loan="' + e.id + '"]');
-          if (n) n.textContent = num(e.left) > 0 ? "ultima în " + lastPayment(num(e.left)) + " · rest " + lei(num(e.amount) * num(e.left)) : "";
+          if (n) n.textContent = num(e.left) > 0 ? (remaining(e) ? "ultima în " + lastPaymentOf(e) + " · rest " + lei(expAmount(e) * remaining(e)) : "achitat în " + lastPaymentOf(e)) : "";
+          var li = document.querySelector('[data-left="' + e.id + '"]');
+          if (li && document.activeElement !== li && num(e.left)) li.value = remaining(e);
         });
 
         // Editor: medii și total luni pentru venituri variabile
@@ -1137,21 +1208,22 @@
         // Lista cheltuieli
         var list = document.getElementById("expenseList");
         list.innerHTML = "";
-        var sorted = state.expenses.filter(function (e) { return num(e.amount) > 0; })
-          .sort(function (a, b) { return num(b.amount) - num(a.amount); });
+        var sorted = state.expenses.filter(function (e) { return expAmount(e) > 0; })
+          .sort(function (a, b) { return expAmount(b) - expAmount(a); });
         if (!sorted.length) list.appendChild(el("p", { class: "empty", text: "Adaugă cheltuieli în stânga." }));
         sorted.forEach(function (e) {
-          var pct = incomeTotal > 0 ? Math.round(num(e.amount) / incomeTotal * 100) : 0;
+          var pct = incomeTotal > 0 ? Math.round(expAmount(e) / incomeTotal * 100) : 0;
           var lbl = el("span", { class: "lbl", text: e.label || "Cheltuială" });
           var subs = [];
           if (e.payer !== "comun" && personIndex(e.payer) >= 0) subs.push("plătește " + nameOf(e.payer));
           if (num(e.left) > 0) subs.push(loanText(e));
+          if (e.seasonal) subs.push((isWinter() ? "tarif de iarnă" : "tarif de vară") + " · iarna " + lei(num(e.winter.amount)) + ", vara " + lei(num(e.summer.amount)));
           if (subs.length) lbl.appendChild(el("span", { class: "sub", text: subs.join(" · ") }));
           list.appendChild(el("div", { class: "list-line" }, [
             el("span", { class: "ico", text: e.icon || "📦", "aria-hidden": "true" }),
             lbl,
             el("span", { class: "pct num", text: pct + "%" }),
-            el("span", { class: "val num", text: lei(num(e.amount)) })
+            el("span", { class: "val num", text: lei(expAmount(e)) })
           ]));
         });
 
@@ -1162,7 +1234,7 @@
         var palette = ["var(--p2)", "var(--p1)", "var(--p3)", "var(--p4)"];
         sorted.forEach(function (e, i) {
           stack.appendChild(el("i", {
-            style: "width:" + (num(e.amount) / base * 100) + "%;background:" + palette[i % palette.length] + ";opacity:" + (1 - Math.floor(i / 4) * 0.25)
+            style: "width:" + (expAmount(e) / base * 100) + "%;background:" + palette[i % palette.length] + ";opacity:" + (1 - Math.floor(i / 4) * 0.25)
           }));
         });
         var usedPct = incomeTotal > 0 ? Math.round(expenseTotal / incomeTotal * 100) : 0;
@@ -1264,7 +1336,7 @@
 
           var housing = state.expenses.filter(function (e) {
             return e.icon === "🏠" || /chiri|ipotec/i.test(e.label || "");
-          }).reduce(function (s, e) { return s + num(e.amount); }, 0);
+          }).reduce(function (s, e) { return s + expAmount(e); }, 0);
           if (housing > 0) {
             var hp = Math.round(housing / incomeTotal * 100);
             tips.push([hp > 35 ? "🏠" : "🏡", "Locuința (chirie/rate) înseamnă " + hp + "% din venit" + (hp > 35 ? " – peste pragul uzual de 35–40%." : ".")]);
@@ -1279,16 +1351,23 @@
             else if (disp > 0) tips.push(["🛟", t + ": îți mai lipsesc " + lei(missing) + ", adică ~" + Math.ceil(missing / disp) + " luni de economisit la ritmul actual."]);
             else tips.push(["🛟", t + ". Fără venit disponibil nu poți pune nimic deoparte – taie întâi din cheltuieli."]);
           }
-          var loans = state.expenses.filter(function (e) { return num(e.left) > 0 && num(e.amount) > 0; })
-            .sort(function (a, b) { return num(a.left) - num(b.left); });
+          var seasonal = state.expenses.filter(function (e) { return e.seasonal; });
+          if (seasonal.length) {
+            var delta = seasonal.reduce(function (s, e) { return s + num(e.winter.amount) - num(e.summer.amount); }, 0);
+            var wTotal = expenseTotal + (isWinter() ? 0 : delta), sTotal = expenseTotal - (isWinter() ? delta : 0);
+            tips.push([isWinter() ? "❄️" : "☀️", "Acum e " + (isWinter() ? "iarnă" : "vară") + " (iarna = oct–mar). Cheltuieli lunare iarna: " +
+              lei(wTotal) + ", vara: " + lei(sTotal) + " (diferență " + lei(Math.abs(delta)) + ")."]);
+          }
+          var loans = state.expenses.filter(function (e) { return num(e.left) > 0 && expAmount(e) > 0; })
+            .sort(function (a, b) { return remaining(a) - remaining(b); });
           loans.forEach(function (e) {
-            tips.push(["💳", (e.label || "Rata") + " se termină în " + lastPayment(num(e.left)) + " (" +
-              Math.round(num(e.left)) + " rate, " + lei(num(e.amount) * num(e.left)) + " de plătit). Apoi aveți +" +
-              lei(num(e.amount)) + " pe lună."]);
+            tips.push(["💳", (e.label || "Rata") + " se termină în " + lastPaymentOf(e) + " (" +
+              remaining(e) + " rate, " + lei(expAmount(e) * remaining(e)) + " de plătit). Apoi aveți +" +
+              lei(expAmount(e)) + " pe lună."]);
           });
           if (loans.length > 1) {
             tips.push(["📉", "Total de plătit pe ratele cu durată cunoscută: " +
-              lei(loans.reduce(function (s, e) { return s + num(e.amount) * num(e.left); }, 0)) + "."]);
+              lei(loans.reduce(function (s, e) { return s + expAmount(e) * remaining(e); }, 0)) + "."]);
           }
           var irregular = state.incomes.filter(function (x) { return x.freq !== "luna" && monthlyLei(x) > 0; });
           if (irregular.length) {
