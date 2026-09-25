@@ -514,7 +514,7 @@
       .split-card .who { font-weight: 700; display: flex; align-items: center; gap: 6px; }
       .split-card .amount { font-size: 1.35rem; font-weight: 800; margin: 2px 0 6px; }
       .split-card dl { margin: 0; display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; font-size: 0.8rem; color: var(--muted); }
-      .split-card dd { margin: 0; text-align: right; color: var(--ink); }
+      .split-card dd { margin: 0; text-align: right; color: var(--ink); white-space: nowrap; }
 
       .tips { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 0.9rem; }
       .tips li { display: flex; gap: 10px; align-items: flex-start; }
@@ -664,7 +664,7 @@
         <section class="card">
           <h2>Cine cât alocă · doar comune</h2>
           <div class="seg" role="group" aria-label="Mod de împărțire" style="margin:10px 0 14px">
-            <button type="button" data-split="proportional">Proporțional cu venitul</button>
+            <button type="button" data-split="proportional">Proporțional cu ce rămâne</button>
             <button type="button" data-split="egal">În mod egal</button>
           </div>
           <div class="split-grid" id="split"></div>
@@ -1296,12 +1296,14 @@
           b.setAttribute("aria-pressed", String(b.dataset.split === state.split));
         });
         var toSplit = Math.max(0, commonExp - commonIncome);
-        var personalSum = state.people.reduce(function (s, p) { return s + perPersonIncome[p.id]; }, 0);
+        // Proporțional cu ce rămâne fiecăruia după cheltuielile proprii (venit − cheltuieli proprii, minim 0).
+        var netOf = function (p) { return Math.max(0, perPersonIncome[p.id] - perPersonExp[p.id]); };
+        var personalSum = state.people.reduce(function (s, p) { return s + netOf(p); }, 0);
         var split = document.getElementById("split");
         split.innerHTML = "";
         var usedEqual = state.split === "egal" || personalSum <= 0;
         state.people.forEach(function (p, i) {
-          var share = usedEqual ? 1 / state.people.length : perPersonIncome[p.id] / personalSum;
+          var share = usedEqual ? 1 / state.people.length : netOf(p) / personalSum;
           var contrib = toSplit * share;
           var own = perPersonExp[p.id];
           var left = perPersonIncome[p.id] - contrib - own;
@@ -1315,6 +1317,7 @@
               el("dt", { text: "Pondere" }), el("dd", { class: "num", text: Math.round(share * 100) + "%" }),
               el("dt", { text: "Venit" }), el("dd", { class: "num", text: lei(perPersonIncome[p.id]) }),
               el("dt", { text: "Cheltuieli proprii" }), el("dd", { class: "num", text: lei(own) }),
+              el("dt", { text: "După proprii" }), el("dd", { class: "num", text: (perPersonIncome[p.id] - own < 0 ? "−" : "") + lei(Math.abs(perPersonIncome[p.id] - own)) }),
               el("dt", { text: "Îi rămân" }), el("dd", { class: "num", style: left < 0 ? "color:var(--bad)" : "", text: (left < 0 ? "−" : "") + lei(Math.abs(left)) })
             ])
           ]));
@@ -1322,7 +1325,11 @@
         var sn = "Cheltuieli comune: " + lei(commonExp);
         if (commonIncome > 0) sn += ", din care " + lei(Math.min(commonIncome, commonExp)) + " acoperite din venituri comune (ex. chirii încasate)";
         sn += ". De împărțit: " + lei(toSplit) + ".";
-        if (state.split === "proportional" && personalSum <= 0 && state.people.length) sn += " Fără venituri personale, împărțirea se face egal.";
+        if (state.split === "proportional" && state.people.length) {
+          sn += personalSum > 0
+            ? " Ponderea fiecăruia = ce îi rămâne după cheltuielile proprii, din totalul rămas."
+            : " Nimănui nu îi rămâne nimic după cheltuielile proprii, așa că împărțirea se face egal.";
+        }
         document.getElementById("splitNote").textContent = sn;
 
         // Observații
