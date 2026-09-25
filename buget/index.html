@@ -740,10 +740,11 @@
             ["📱", "Abonamente", 300], ["🚗", "Transport", 600], ["✨", "Dorințe lunare", 1000]]
         },
         {
-          name: "Două ipoteci + chirie încasată",
+          name: "Două ipoteci + chirii încasate",
           people: ["El", "Ea"],
           incomes: [["Salariu El", 12300, "luna", "RON", 0], ["Salariu Ea", 13500, "luna", "RON", 1],
-            ["Chirie încasată", 2500, "luna", "RON"]],
+            ["Chirie Eroii Revoluției", 2500, "luna", "RON"],
+            ["Chirie Drumul Taberei", 0, "luna", "RON"]],
           expenses: [["🏠", "Rată ipotecar 1", 3300], ["🏠", "Rată ipotecar 2", 1700], ["💡", "Utilități", 900],
             ["🛒", "Mâncare", 4000], ["🚗", "Transport", 1500], ["📱", "Abonamente", 230], ["✨", "Dorințe", 2000]]
         },
@@ -1186,7 +1187,7 @@
           ]));
         });
         var sn = "Cheltuieli comune: " + lei(commonExp);
-        if (commonIncome > 0) sn += ", din care " + lei(Math.min(commonIncome, commonExp)) + " acoperite din venituri comune (ex. chirie încasată)";
+        if (commonIncome > 0) sn += ", din care " + lei(Math.min(commonIncome, commonExp)) + " acoperite din venituri comune (ex. chirii încasate)";
         sn += ". De împărțit: " + lei(toSplit) + ".";
         if (state.split === "proportional" && personalSum <= 0 && state.people.length) sn += " Fără venituri personale, împărțirea se face egal.";
         document.getElementById("splitNote").textContent = sn;
