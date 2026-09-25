@@ -483,7 +483,8 @@
         color: var(--muted);
       }
 
-      .total-line b { color: var(--accent-ink); font-size: 1.3rem; }
+      .total-line { gap: 12px; }
+      .total-line b { color: var(--accent-ink); font-size: 1.3rem; white-space: nowrap; }
 
       .stack {
         display: flex;
@@ -722,7 +723,7 @@
     (function () {
       "use strict";
 
-      var STORE_KEY = "buget-familie-v20";
+      var STORE_KEY = "buget-familie-v21";
       var COLORS = ["var(--p1)", "var(--p2)", "var(--p3)", "var(--p4)"];
       var ICONS = [
         ["🏠", "Locuință"], ["💡", "Utilități"], ["🛒", "Mâncare"], ["🚗", "Transport"],
@@ -758,7 +759,7 @@
           fund: p.fund || 0,
           savings: (p.savings || []).map(function (v) {
             return { id: id(), label: v[0], amount: v[1], rate: v[2], payout: v[3] || "anual", tax: v[4] || 0, start: v[5] || "",
-              term: v[6] || 0, termAt: v[5] || thisMonth() };
+              term: v[6] || 0, termAt: v[5] || thisMonth(), img: v[7] || "" };
           }),
           baseline: null,
           split: "proportional",
@@ -796,12 +797,12 @@
             "Rată ipotecar Marius": "icons/exim.png", "Rată nevoi Marius": "icons/salt.png",
             "Rată ipotecar Maria": "icons/ing.png", "Rată nevoi Maria": "icons/ing.png",
             "Transport": "icons/rompetrol.png", "iCloud": "icons/icloud.png", "Internet + TV": "icons/digi.png",
-            "Electrica": "icons/ihidro.png", "Claude AI": "icons/claude.svg", "Revista DeAgostini": "icons/deagostini.png"
+            "Electrica": "icons/ihidro.png", "Gaz": "icons/engie.png", "Claude AI": "icons/claude.svg", "Revista DeAgostini": "icons/deagostini.png"
           },
-          savings: [["Salt Bank Fidelis", 120000, 7.3, "anual", 0, "2026-10", 24],
-            ["Revolut Joint", 60000, 2.5, "zilnic", 10, ""],
+          savings: [["Salt Bank Fidelis", 120000, 7.3, "anual", 0, "2026-10", 24, "icons/salt.png"],
+            ["Revolut Joint", 60000, 2.5, "zilnic", 10, "", 0, "icons/revolut.png"],
             ["CEC Bank", 64100, 5.25, "anual", 10, ""],
-            ["ING Bank economii", 40123, 2, "lunar", 10, ""]],
+            ["ING Bank economii", 40123, 2, "lunar", 10, "", 0, "icons/ing.png"]],
           incomes: [["Salariu Marius", 0, "luna", "RON", 0], ["Salariu Maria", 9500, "luna", "RON", 1],
             ["Bonuri de masă Marius", 0, "luna", "RON", 0],
             ["Bonuri de masă Maria", 765, "luna", "RON", 1],
@@ -1545,7 +1546,9 @@
             var lbl = el("span", { class: "lbl", text: v.label || "Cont" });
             lbl.appendChild(el("span", { class: "sub", text: lei(num(v.amount)) + " · " + parts.join(" · ") }));
             sl.appendChild(el("div", { class: "list-line" }, [
-              el("span", { class: "ico", text: "🏦", "aria-hidden": "true" }),
+              v.img
+                ? el("span", { class: "ico", "aria-hidden": "true" }, [el("img", { src: v.img, alt: "" })])
+                : el("span", { class: "ico", text: "🏦", "aria-hidden": "true" }),
               lbl,
               el("span", { class: "val num", style: savingActive(v) ? "" : "color:var(--muted)", text: savingText(v) })
             ]));
