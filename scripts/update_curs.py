@@ -41,12 +41,22 @@ def from_cursbnr():
 
 
 def from_bnr():
-    xml = get("https://www.bnr.ro/nbrfxrates.xml")
-    rate = re.search(r'<Rate currency="EUR"(?: multiplier="1")?>([\d.]+)</Rate>', xml)
-    date = re.search(r"<PublishingDate>(\d{4}-\d{2}-\d{2})</PublishingDate>", xml)
-    if not rate or not plausible(float(rate.group(1))):
-        raise ValueError("EUR rate not found in BNR XML")
-    return float(rate.group(1)), date.group(1) if date else None
+    errors = []
+    for url in ("https://www.bnr.ro/nbrfxrates.xml", "https://curs.bnr.ro/nbrfxrates.xml"):
+        try:
+            xml = get(url)
+        except Exception as e:  # noqa: BLE001
+            errors.append(f"{url}: {e}")
+            continue
+        rate = re.search(r"<(?:\w+:)?Rate\b[^>]*currency=[\"']EUR[\"'][^>]*>\s*([\d.,]+)", xml)
+        date = (re.search(r"<(?:\w+:)?PublishingDate>\s*(\d{4}-\d{2}-\d{2})", xml)
+                or re.search(r"<(?:\w+:)?Cube\b[^>]*date=[\"'](\d{4}-\d{2}-\d{2})", xml))
+        if rate:
+            v = float(rate.group(1).replace(",", "."))
+            if plausible(v):
+                return v, date.group(1) if date else None
+        errors.append(f"{url}: EUR not found; starts with {xml[:200]!r}")
+    raise ValueError("; ".join(errors))
 
 
 def main():
