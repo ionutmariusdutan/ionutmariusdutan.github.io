@@ -207,10 +207,20 @@ a {
   position: absolute;
   inset: 0;
   display: block;
-  background-image: url("assets/support-operations-map.jpg"), url("assets/support-operations-map.jpg");
-  background-position: right top, right top;
+  background-image: url("assets/support-operations-map.jpg");
+  background-position: right top;
   background-repeat: no-repeat;
-  background-size: auto 100%, cover;
+  background-size: cover;
+}
+
+.hero-map {
+  position: absolute;
+  top: -38px;
+  right: 0;
+  width: auto;
+  height: min(112%, 62vw);
+  aspect-ratio: 2400 / 1125;
+  max-width: none;
 }
 
 .hero::after {
@@ -1133,6 +1143,10 @@ a {
     background-size: cover;
   }
 
+  .hero-map {
+    display: none;
+  }
+
   .hero-content {
     padding-top: 60px;
     padding-bottom: 30px;
@@ -1140,9 +1154,9 @@ a {
 
   .hero-ai {
     display: block;
-    width: min(210px, 56%);
+    width: 112px;
     height: auto;
-    margin: 4px auto 18px;
+    margin: 0 auto 14px;
   }
 
   .hero-persona {

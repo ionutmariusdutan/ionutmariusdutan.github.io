@@ -53,6 +53,28 @@
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <radialGradient id="ai-glow"><stop offset="0" stop-color="#5ac8ff" stop-opacity=".5"/><stop offset="1" stop-color="#5ac8ff" stop-opacity="0"/></radialGradient>
+    <filter id="ai-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="9"/></filter>
+    <clipPath id="ai-brain-clip"><ellipse cx="74.0" cy="53.0" rx="60.0" ry="39.0"/><ellipse cx="35.0" cy="64.0" rx="27.0" ry="28.0"/><ellipse cx="81.0" cy="82.0" rx="37.0" ry="24.0"/><ellipse cx="99.0" cy="29.0" rx="29.0" ry="21.0"/></clipPath>
+    <symbol id="ai-illus" viewBox="0 0 175 212">
+      <ellipse cx="75" cy="60" rx="86" ry="62" fill="url(#ai-glow)"/>
+      <g fill="none" stroke="#96d7eb" stroke-width="6"><ellipse cx="74.0" cy="53.0" rx="60.0" ry="39.0"/><ellipse cx="35.0" cy="64.0" rx="27.0" ry="28.0"/><ellipse cx="81.0" cy="82.0" rx="37.0" ry="24.0"/><ellipse cx="99.0" cy="29.0" rx="29.0" ry="21.0"/><ellipse cx="117.0" cy="96.0" rx="21.0" ry="12.0"/></g>
+      <g fill="#2e6886"><ellipse cx="74.0" cy="53.0" rx="60.0" ry="39.0"/><ellipse cx="35.0" cy="64.0" rx="27.0" ry="28.0"/><ellipse cx="81.0" cy="82.0" rx="37.0" ry="24.0"/><ellipse cx="99.0" cy="29.0" rx="29.0" ry="21.0"/></g>
+      <ellipse cx="117.0" cy="96.0" rx="21.0" ry="12.0" fill="#245470"/><polygon points="88,98 100,98 98,116 90,116" fill="#245470"/>
+      <g clip-path="url(#ai-brain-clip)">
+        <g fill="#78bed7" fill-opacity=".47" filter="url(#ai-soft)"><ellipse cx="70.0" cy="39.0" rx="40.0" ry="21.0"/><ellipse cx="105.0" cy="33.0" rx="35.0" ry="19.0"/></g>
+        <g fill="none" stroke="#a5dcee" stroke-opacity=".73" stroke-width="1.5" stroke-linejoin="round"><polyline points="24,25.9 26,27.0 28,28.2 30,29.4 32,30.4 34,31.1 36,31.2 38,30.8 40,30.0 42,28.9 44,27.6 46,26.4 48,25.4 50,24.9 52,24.8 54,25.3 56,26.2 58,27.3 60,28.6 62,29.8 64,30.7 66,31.1 68,31.1 70,30.6 72,29.7 74,28.5 76,27.2 78,26.1 80,25.2 82,24.8 84,24.9 86,25.5 88,26.5 90,27.7 92,28.9 94,30.1 96,30.9 98,31.2 100,31.0 102,30.4 104,29.4 106,28.1 108,26.9 110,25.8 112,25.1 114,24.8 116,25.0 118,25.7 120,26.8 122,28.1 124,29.3 126,30.3 128,31.0 130,31.2"/><polyline points="24,43.1 26,43.1 28,42.6 30,41.7 32,40.5 34,39.2 36,38.1 38,37.2 40,36.8 42,36.9 44,37.5 46,38.5 48,39.7 50,40.9 52,42.1 54,42.9 56,43.2 58,43.0 60,42.4 62,41.4 64,40.1 66,38.9 68,37.8 70,37.1 72,36.8 74,37.0 76,37.7 78,38.8 80,40.1 82,41.3 84,42.3 86,43.0 88,43.2 90,42.9 92,42.1 94,41.0 96,39.8 98,38.5 100,37.5 102,36.9 104,36.8 106,37.2 108,38.0 110,39.2 112,40.4 114,41.6 116,42.6 118,43.1 120,43.2 122,42.7 124,41.8 126,40.7 128,39.4 130,38.2"/><polyline points="24,50.9 26,49.8 28,49.1 30,48.8 32,49.0 34,49.7 36,50.8 38,52.1 40,53.3 42,54.3 44,55.0 46,55.2 48,54.9 50,54.1 52,53.0 54,51.8 56,50.5 58,49.5 60,48.9 62,48.8 64,49.2 66,50.0 68,51.2 70,52.4 72,53.6 74,54.6 76,55.1 78,55.2 80,54.7 82,53.8 84,52.7 86,51.4 88,50.2 90,49.3 92,48.9 94,48.9 96,49.4 98,50.3 100,51.5 102,52.8 104,53.9 106,54.8 108,55.2 110,55.1 112,54.5 114,53.5 116,52.3 118,51.0 120,49.9 122,49.1 124,48.8 126,49.0 128,49.6 130,50.7"/><polyline points="24,62.0 26,63.2 28,64.4 30,65.6 32,66.6 34,67.1 36,67.2 38,66.7 40,65.8 42,64.7 44,63.4 46,62.2 48,61.3 50,60.9 52,60.9 54,61.4 56,62.3 58,63.5 60,64.8 62,65.9 64,66.8 66,67.2 68,67.1 70,66.5 72,65.5 74,64.3 76,63.0 78,61.9 80,61.1 82,60.8 84,61.0 86,61.6 88,62.7 90,63.9 92,65.2 94,66.2 96,66.9 98,67.2 100,67.0 102,66.2 104,65.2 106,63.9 108,62.7 110,61.6 112,61.0 114,60.8 116,61.1 118,61.9 120,63.0 122,64.3 124,65.5 126,66.5 128,67.1 130,67.2"/><polyline points="24,79.2 26,79.1 28,78.5 30,77.5 32,76.3 34,75.0 36,73.9 38,73.1 40,72.8 42,73.0 44,73.6 46,74.7 48,75.9 50,77.2 52,78.2 54,78.9 56,79.2 58,79.0 60,78.2 62,77.2 64,75.9 66,74.7 68,73.6 70,73.0 72,72.8 74,73.1 76,73.9 78,75.0 80,76.3 82,77.5 84,78.5 86,79.1 88,79.2 90,78.8 92,78.0 94,76.8 96,75.5 98,74.3 100,73.4 102,72.9 104,72.8 106,73.3 108,74.2 110,75.4 112,76.6 114,77.8 116,78.7 118,79.2 120,79.1 122,78.6 124,77.6 126,76.4 128,75.2 130,74.0"/><polyline points="24,86.7 26,85.6 28,85.0 30,84.8 32,85.1 34,85.9 36,87.0 38,88.3 40,89.5 42,90.5 44,91.1 46,91.2 48,90.8 50,90.0 52,88.8 54,87.5 56,86.3 58,85.4 60,84.9 62,84.8 64,85.3 66,86.2 68,87.4 70,88.6 72,89.8 74,90.7 76,91.2 78,91.1 80,90.6 82,89.6 84,88.4 86,87.2 88,86.0 90,85.2 92,84.8 94,84.9 96,85.5 98,86.5 100,87.7 102,89.0 104,90.1 106,90.9 108,91.2 110,91.0 112,90.3 114,89.3 116,88.1 118,86.8 120,85.8 122,85.0 124,84.8 126,85.1 128,85.8 130,86.9"/></g>
+        <polyline points="73.2,18 71.7,20 70.0,22 68.3,24 66.7,26 65.5,28 64.5,30 64.1,32 64.1,34 64.5,36 65.5,38 66.8,40 68.3,42 70.0,44 71.7,46 73.3,48 74.5,50 75.5,52 75.9,54 75.9,56 75.4,58 74.5,60 73.2,62 71.7,64 70.0,66 68.3,68 66.7,70 65.4,72 64.5,74 64.1,76 64.1,78 64.6,80 65.5,82 66.8,84 68.3,86 70.0,88 71.7,90" fill="none" stroke="#bee9f8" stroke-opacity=".78" stroke-width="1.8"/>
+      </g>
+      <g fill="none" stroke="#82bed2" stroke-width="1"><path d="M135.7 96.6A19 9.0 0 0 1 98.3 96.6" /><path d="M135.7 99.4A19 8.0 0 0 1 98.3 99.4" /><path d="M135.7 102.2A19 7.0 0 0 1 98.3 102.2" /><path d="M135.7 105.0A19 6.0 0 0 1 98.3 105.0" /></g>
+      <rect x="54" y="38" width="44" height="32" rx="7" fill="#183446" fill-opacity=".92" stroke="#e6f8ff" stroke-width="2"/>
+      <text x="76" y="55" text-anchor="middle" dominant-baseline="central" font-family="inherit" font-weight="800" font-size="24" fill="#fff">AI</text>
+      <line x1="128" y1="189" x2="100" y2="180" stroke="#a0aeba" stroke-width="34" stroke-linecap="round"/><line x1="100" y1="180" x2="70" y2="172" stroke="#cdd7de" stroke-width="30" stroke-linecap="round"/><line x1="58" y1="164" x2="46" y2="146" stroke="#cdd7de" stroke-width="11" stroke-linecap="round"/><circle cx="46" cy="146" r="3.0250000000000004" fill="none" stroke="#78e1ff" stroke-width="1.6"/><line x1="46" y1="146" x2="40" y2="126" stroke="#cdd7de" stroke-width="9.5" stroke-linecap="round"/><circle cx="40" cy="126" r="2.6125000000000003" fill="none" stroke="#78e1ff" stroke-width="1.6"/><line x1="72" y1="160" x2="62" y2="138" stroke="#cdd7de" stroke-width="11" stroke-linecap="round"/><circle cx="62" cy="138" r="3.0250000000000004" fill="none" stroke="#78e1ff" stroke-width="1.6"/><line x1="62" y1="138" x2="57" y2="116" stroke="#cdd7de" stroke-width="9.5" stroke-linecap="round"/><circle cx="57" cy="116" r="2.6125000000000003" fill="none" stroke="#78e1ff" stroke-width="1.6"/><line x1="86" y1="160" x2="79" y2="136" stroke="#cdd7de" stroke-width="11" stroke-linecap="round"/><circle cx="79" cy="136" r="3.0250000000000004" fill="none" stroke="#78e1ff" stroke-width="1.6"/><line x1="79" y1="136" x2="77" y2="114" stroke="#cdd7de" stroke-width="9.5" stroke-linecap="round"/><circle cx="77" cy="114" r="2.6125000000000003" fill="none" stroke="#78e1ff" stroke-width="1.6"/><line x1="100" y1="162" x2="97" y2="140" stroke="#cdd7de" stroke-width="11" stroke-linecap="round"/><circle cx="97" cy="140" r="3.0250000000000004" fill="none" stroke="#78e1ff" stroke-width="1.6"/><line x1="97" y1="140" x2="99" y2="122" stroke="#cdd7de" stroke-width="9.5" stroke-linecap="round"/><circle cx="99" cy="122" r="2.6125000000000003" fill="none" stroke="#78e1ff" stroke-width="1.6"/><line x1="116" y1="172" x2="132" y2="156" stroke="#cdd7de" stroke-width="11" stroke-linecap="round"/><circle cx="132" cy="156" r="3.0250000000000004" fill="none" stroke="#78e1ff" stroke-width="1.6"/><line x1="132" y1="156" x2="138" y2="140" stroke="#cdd7de" stroke-width="9.5" stroke-linecap="round"/><circle cx="138" cy="140" r="2.6125000000000003" fill="none" stroke="#78e1ff" stroke-width="1.6"/><circle cx="124" cy="187" r="10" fill="none" stroke="#78e1ff" stroke-width="2"/>
+    </symbol>
+  </defs>
+</svg>
     <a class="skip-link" href="#main">Skip to content</a>
 
     <header class="site-header" data-header>
@@ -89,7 +111,20 @@
 
     <main id="main">
       <section class="hero" id="top" aria-labelledby="hero-title">
-        <div class="hero-media" aria-hidden="true"></div>
+        <div class="hero-media" aria-hidden="true">
+          <svg class="hero-map" viewBox="0 0 2400 1125" aria-hidden="true" focusable="false">
+            <image href="assets/support-operations-map.jpg" width="2400" height="1125"/>
+            <g font-family="inherit" font-weight="700" font-size="22">
+              <text x="1850" y="370" text-anchor="middle" dominant-baseline="central" fill="#fff">Product</text>
+              <text x="1650" y="420" text-anchor="middle" dominant-baseline="central" fill="#1f2a29">QA</text>
+              <text x="1560" y="620" text-anchor="middle" dominant-baseline="central" fill="#1f2a29">Knowledge</text>
+              <text x="2060" y="428" text-anchor="middle" dominant-baseline="central" fill="#fff">Engineering</text>
+              <text x="1810" y="795" text-anchor="middle" dominant-baseline="central" fill="#fff">Support</text>
+              <text x="1751" y="220" dominant-baseline="central" font-size="30" fill="#fff">Service transition</text>
+            </g>
+            <use href="#ai-illus" x="1845" y="512" width="236" height="286"/>
+          </svg>
+        </div>
         <div class="hero-content section-shell">
           <div class="hero-persona">
             <img
@@ -107,7 +142,7 @@
             globally enabled operations.
           </p>
 
-          <img class="hero-ai" src="assets/ai-brain-hand.png" alt="" width="380" height="490" aria-hidden="true">
+          <svg class="hero-ai" viewBox="0 0 175 212" aria-hidden="true" focusable="false"><use href="#ai-illus"/></svg>
 
           <div class="hero-actions" aria-label="Primary actions">
             <a class="button button-primary" href="#contact">Let's connect</a>
