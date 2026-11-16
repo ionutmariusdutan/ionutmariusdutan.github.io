@@ -5,6 +5,7 @@ const navLinks = Array.from(document.querySelectorAll(".nav-link"));
 const copyButton = document.querySelector("[data-copy-email]");
 const copyStatus = document.querySelector("[data-copy-status]");
 const yearNode = document.querySelector("[data-year]");
+const t = (text) => window.i18n?.t(text) ?? text;
 
 if (yearNode) {
   yearNode.textContent = new Date().getFullYear();
@@ -14,14 +15,14 @@ const closeNavigation = () => {
   document.body.classList.remove("nav-open");
   navMenu?.classList.remove("is-open");
   navToggle?.setAttribute("aria-expanded", "false");
-  navToggle?.setAttribute("aria-label", "Open navigation");
+  navToggle?.setAttribute("aria-label", t("Open navigation"));
 };
 
 navToggle?.addEventListener("click", () => {
   const isOpen = navMenu?.classList.toggle("is-open");
   document.body.classList.toggle("nav-open", Boolean(isOpen));
   navToggle.setAttribute("aria-expanded", String(Boolean(isOpen)));
-  navToggle.setAttribute("aria-label", isOpen ? "Close navigation" : "Open navigation");
+  navToggle.setAttribute("aria-label", t(isOpen ? "Close navigation" : "Open navigation"));
 });
 
 navLinks.forEach((link) => {
@@ -87,14 +88,18 @@ const timelineToggle = document.querySelector("[data-timeline-toggle]");
 const timelineEarlier = document.querySelector("[data-timeline-earlier]");
 const timelineToggleLabel = document.querySelector("[data-toggle-label]");
 
+const syncTimelineLabel = () => {
+  if (timelineToggleLabel && timelineEarlier) {
+    timelineToggleLabel.textContent = t(timelineEarlier.hidden ? "Show 2 earlier roles (2010-2019)" : "Hide earlier roles");
+  }
+};
+
 timelineToggle?.addEventListener("click", () => {
   const isHidden = timelineEarlier.hidden;
   timelineEarlier.hidden = !isHidden;
   timelineToggle.classList.toggle("is-open", isHidden);
   timelineToggle.setAttribute("aria-expanded", String(isHidden));
-  if (timelineToggleLabel) {
-    timelineToggleLabel.textContent = isHidden ? "Hide earlier roles" : "Show 2 earlier roles (2010-2019)";
-  }
+  syncTimelineLabel();
   if (isHidden) {
     timelineEarlier.querySelectorAll(".reveal").forEach((item) => item.classList.add("is-visible"));
   }
@@ -109,11 +114,20 @@ copyButton?.addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(email);
     if (copyStatus) {
-      copyStatus.textContent = "Email copied.";
+      copyStatus.textContent = t("Email copied.");
     }
   } catch {
     if (copyStatus) {
       copyStatus.textContent = email;
     }
+  }
+});
+
+document.addEventListener("languagechange", () => {
+  syncTimelineLabel();
+  const menuOpen = navMenu?.classList.contains("is-open");
+  navToggle?.setAttribute("aria-label", t(menuOpen ? "Close navigation" : "Open navigation"));
+  if (copyStatus?.textContent === "Email copied." || copyStatus?.textContent === t("Email copied.")) {
+    copyStatus.textContent = t("Email copied.");
   }
 });

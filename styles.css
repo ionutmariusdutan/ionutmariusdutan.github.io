@@ -152,6 +152,29 @@ a {
   color: #17130b;
 }
 
+.lang-toggle {
+  order: 3;
+  min-width: 42px;
+  height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0 12px;
+  color: #fffdf8;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.lang-toggle:hover,
+.lang-toggle:focus-visible {
+  background: var(--amber);
+  color: #17130b;
+}
+
 .nav-toggle {
   display: none;
   width: 42px;
@@ -1050,6 +1073,15 @@ a {
     max-width: 190px;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .nav {
+    gap: 10px;
+  }
+
+  .lang-toggle {
+    order: 0;
+    margin-left: auto;
   }
 
   .nav-toggle {
