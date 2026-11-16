@@ -224,6 +224,10 @@ a {
   pointer-events: none;
 }
 
+.hero-ai {
+  display: none;
+}
+
 .hero-content {
   position: relative;
   z-index: 1;
@@ -1132,6 +1136,13 @@ a {
   .hero-content {
     padding-top: 60px;
     padding-bottom: 30px;
+  }
+
+  .hero-ai {
+    display: block;
+    width: min(210px, 56%);
+    height: auto;
+    margin: 4px auto 18px;
   }
 
   .hero-persona {
