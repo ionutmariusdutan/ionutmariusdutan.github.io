@@ -68,16 +68,16 @@
     "Oracle role progression": "Evoluția rolurilor la Oracle",
     "Progressed from L1/L2 employee support into EMEA operations leadership, senior endpoint escalation ownership and Support Product Management for service transition and release readiness.":
       "Am evoluat de la suport L1/L2 pentru angajați la conducerea operațiunilor EMEA, responsabilitatea senior pentru escalările endpoint și Support Product Management pentru tranziția serviciilor și pregătirea lansărilor.",
-    "Lead end-to-end service onboarding and transition into Support, ensuring readiness across documentation, knowledge, tooling, training and operations.":
-      "Conduc onboarding-ul și tranziția end-to-end a serviciilor în Support, asigurând pregătirea la nivel de documentație, cunoștințe, instrumente, training și operațiuni.",
-    "Own Support Transition Jira (ALM), tracking milestones, risks, dependencies and RACI accountability while providing executive-level status updates.":
-      "Dețin Support Transition Jira (ALM), urmărind milestone-uri, riscuri, dependențe și responsabilitate RACI, oferind actualizări de status la nivel executiv.",
-    "Coordinate Service Owners, Product Managers, Engineering and Support Leadership to deliver support readiness, knowledge readiness and AI Service Desk compliance.":
-      "Coordonez Service Owners, Product Managers, Engineering și conducerea Suportului pentru a livra pregătire de suport, pregătirea cunoștințelor și conformitatea AI Service Desk.",
-    "Drive Top 10 issue intake with Engineering to address root causes, improve product quality and reduce support demand.":
-      "Conduc preluarea Top 10 probleme împreună cu Engineering pentru a trata cauzele principale, a îmbunătăți calitatea produsului și a reduce cererea de suport.",
-    "Perform pre-production testing, validation and release readiness checks to identify risks early and reduce post-launch escalations.":
-      "Execut testare pre-producție, validare și verificări de pregătire pentru lansare, pentru a identifica riscurile din timp și a reduce escaladările de după lansare.",
+    "Led end-to-end service onboarding and transition into Support, ensuring readiness across documentation, knowledge, tooling, training and operations.":
+      "Am condus onboarding-ul și tranziția end-to-end a serviciilor în Support, asigurând pregătirea la nivel de documentație, cunoștințe, instrumente, training și operațiuni.",
+    "Owned Support Transition Jira (ALM), tracking milestones, risks, dependencies and RACI accountability while providing executive-level status updates.":
+      "Am deținut Support Transition Jira (ALM), urmărind milestone-uri, riscuri, dependențe și responsabilitate RACI, oferind actualizări de status la nivel executiv.",
+    "Coordinated Service Owners, Product Managers, Engineering and Support Leadership to deliver support readiness, knowledge readiness and AI Service Desk compliance.":
+      "Am coordonat Service Owners, Product Managers, Engineering și conducerea Suportului pentru a livra pregătire de suport, pregătirea cunoștințelor și conformitatea AI Service Desk.",
+    "Drove Top 10 issue intake with Engineering to address root causes, improve product quality and reduce support demand.":
+      "Am condus preluarea Top 10 probleme împreună cu Engineering pentru a trata cauzele principale, a îmbunătăți calitatea produsului și a reduce cererea de suport.",
+    "Performed pre-production testing, validation and release readiness checks to identify risks early and reduce post-launch escalations.":
+      "Am executat testare pre-producție, validare și verificări de pregătire pentru lansare, pentru a identifica riscurile din timp și a reduce escaladările de după lansare.",
     "Led 24/7 EMEA support operations for a global team of 100+ engineers, covering task delegation, queue flow, performance metrics and SLA compliance.":
       "Am condus operațiunile de suport EMEA 24/7 pentru o echipă globală de 100+ ingineri, acoperind delegarea sarcinilor, fluxul cozilor, metricile de performanță și conformitatea SLA.",
     "Acted as escalation lead for major incidents and coordinated timely resolution across support groups.":
