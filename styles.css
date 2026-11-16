@@ -234,7 +234,7 @@ a {
   pointer-events: none;
 }
 
-.hero-ai {
+.hero-diagram {
   display: none;
 }
 
@@ -1138,7 +1138,7 @@ a {
   }
 
   .hero-media {
-    background-image: url("assets/support-operations-map-mobile.jpg");
+    background-image: url("assets/hero-background-mobile.jpg");
     background-position: center top;
     background-size: cover;
   }
@@ -1152,11 +1152,21 @@ a {
     padding-bottom: 30px;
   }
 
-  .hero-ai {
+  .hero-diagram {
+    --map-label: 34px;
+    --map-panel: 34px;
     display: block;
-    width: 112px;
+    width: 100%;
     height: auto;
-    margin: 0 auto 14px;
+    margin: 0 0 14px;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent), linear-gradient(180deg, transparent, #000 8%, #000 92%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent), linear-gradient(180deg, transparent, #000 8%, #000 92%, transparent);
+    mask-composite: intersect;
+  }
+
+  html[lang="ro"] .hero-diagram {
+    --map-panel: 29px;
   }
 
   .hero-persona {
