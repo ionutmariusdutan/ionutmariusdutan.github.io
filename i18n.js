@@ -52,6 +52,11 @@
     "Core strengths": "Puncte forte",
     "The work I make easier.": "Munca pe care o fac mai ușoară.",
     "Support transition": "Tranziția către suport",
+    "Service transition": "Tranziția serviciilor",
+    "Product": "Produs",
+    "Knowledge": "Cunoștințe",
+    "Engineering": "Inginerie",
+    "Support": "Suport",
     "Service onboarding, Jira ALM governance, RACI accountability, release/go-live readiness and executive reporting.":
       "Onboarding de servicii, guvernanță Jira ALM, responsabilitate RACI, pregătire pentru release/go-live și raportare executivă.",
     "QA and release validation": "QA și validarea lansărilor",

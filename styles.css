@@ -207,10 +207,20 @@ a {
   position: absolute;
   inset: 0;
   display: block;
-  background-image: url("assets/support-operations-map.jpg"), url("assets/support-operations-map.jpg");
-  background-position: right top, right top;
+  background-image: url("assets/support-operations-map.jpg");
+  background-position: right top;
   background-repeat: no-repeat;
-  background-size: auto 100%, cover;
+  background-size: cover;
+}
+
+.hero-map {
+  position: absolute;
+  top: -38px;
+  right: 0;
+  width: auto;
+  height: min(112%, 62vw);
+  aspect-ratio: 2400 / 1125;
+  max-width: none;
 }
 
 .hero::after {
@@ -224,7 +234,7 @@ a {
   pointer-events: none;
 }
 
-.hero-ai {
+.hero-diagram {
   display: none;
 }
 
@@ -1128,9 +1138,13 @@ a {
   }
 
   .hero-media {
-    background-image: url("assets/support-operations-map-mobile.jpg");
+    background-image: url("assets/hero-background-mobile.jpg");
     background-position: center top;
     background-size: cover;
+  }
+
+  .hero-map {
+    display: none;
   }
 
   .hero-content {
@@ -1138,11 +1152,21 @@ a {
     padding-bottom: 30px;
   }
 
-  .hero-ai {
+  .hero-diagram {
+    --map-label: 34px;
+    --map-panel: 34px;
     display: block;
-    width: min(210px, 56%);
+    width: 100%;
     height: auto;
-    margin: 4px auto 18px;
+    margin: 0 0 14px;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent), linear-gradient(180deg, transparent, #000 8%, #000 92%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent), linear-gradient(180deg, transparent, #000 8%, #000 92%, transparent);
+    mask-composite: intersect;
+  }
+
+  html[lang="ro"] .hero-diagram {
+    --map-panel: 29px;
   }
 
   .hero-persona {
